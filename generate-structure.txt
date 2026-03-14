@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# CORE
+ng g module core
+ng g service core/services/api
+ng g service core/services/auth
+ng g service core/services/token
+ng g guard core/guards/auth --implements CanActivate
+ng g guard core/guards/role --implements CanActivate
+ng g interceptor core/interceptors/auth
+ng g interceptor core/interceptors/error
+
+# SHARED
+ng g module shared
+ng g component shared/components/confirm-dialog
+ng g directive shared/directives/has-role
+ng g pipe shared/pipes/truncate
+
+# FEATURES
+ng g module features/auth --routing
+ng g component features/auth/pages/login
+ng g component features/auth/pages/register
+ng g service features/auth/auth
+
+ng g module features/dashboard --routing
+ng g component features/dashboard/pages/dashboard-home
+
+ng g module features/landing --routing
+ng g component features/landing/pages/home
+ng g component features/landing/pages/pricing
+ng g component features/landing/pages/contact

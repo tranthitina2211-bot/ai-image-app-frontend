@@ -1,0 +1,111 @@
+.mat-card {
+  box-shadow: var(--app-shadow, 0px 5px 20px rgba(0, 0, 0, 0.05)) !important;
+  -webkit-box-shadow: var(--app-shadow, 0px 5px 20px rgba(0, 0, 0, 0.05)) !important;
+  margin: 0 15px 30px;
+  padding: 0px !important;
+  border-radius: $radius;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
+
+  .mat-card-content {
+    font-size: 1rem;
+    line-height: 23px;
+    padding: 24px;
+    color: var(--app-text);
+  }
+
+  .mat-card-image {
+    width: calc(100% + 0px);
+    margin: 0 0px 0px 0px;
+  }
+
+  .mat-card-header {
+    padding: 12px;
+    border-radius: $radius $radius 0 0;
+
+    .mat-card-title {
+      margin-bottom: 2px;
+      font-size: 20px;
+      color: var(--app-heading);
+    }
+
+    .mat-card-subtitle,
+    .mat-card-subtitle:not(:first-child) {
+      margin-bottom: 0px;
+      margin-top: 0px;
+      font-size: 14px;
+      color: var(--app-text-soft);
+    }
+
+    &.text-white {
+      .mat-card-title {
+        color: $white;
+      }
+
+      .mat-card-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
+
+  .mat-card-title {
+    font-size: 20px;
+    margin-bottom: 5px;
+    color: var(--app-heading);
+  }
+
+  .mat-card-subtitle {
+    margin-bottom: 20px;
+    color: var(--app-text-soft);
+  }
+
+  .mat-card-actions {
+    margin: 0px !important;
+  }
+}
+
+.mat-mdc-card {
+  margin-bottom: 30px;
+  box-shadow: var(--app-shadow, 0px 5px 20px rgba(0, 0, 0, 0.05)) !important;
+  -webkit-box-shadow: var(--app-shadow, 0px 5px 20px rgba(0, 0, 0, 0.05)) !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
+
+  .mat-mdc-card-content {
+    font-size: 1rem;
+    line-height: 23px;
+    padding: 24px;
+    color: var(--app-text);
+  }
+
+  .mat-mdc-card-image {
+    width: calc(100% + 0px);
+    margin: 0 0px 0px 0px;
+  }
+
+  .mat-mdc-card-title {
+    font-size: 20px;
+    margin-bottom: 5px;
+    color: var(--app-heading);
+  }
+
+  .mat-mdc-card-subtitle {
+    margin-bottom: 20px;
+    color: var(--app-text-soft);
+  }
+
+  .mat-mdc-card-actions {
+    margin: 0px !important;
+  }
+}
+
+// forms
+.mat-form-field-underline {
+  background-color: var(--app-border, rgba(0, 0, 0, 0.25));
+}
+
+.mat-form-field {
+  width: 100%;
+}

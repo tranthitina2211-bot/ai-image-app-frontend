@@ -1,0 +1,87 @@
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.18);
+  z-index: 10020;
+}
+
+.detail-sheet {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 10021;
+  width: min(100%, 760px);
+  max-height: min(82dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--app-surface) 96%, transparent);
+  color: var(--app-text);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -20px 60px rgba(15, 23, 42, 0.20), 0 -8px 24px rgba(15, 23, 42, 0.10);
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  animation: sheetUp .22s ease-out;
+}
+
+.sheet-handle { width: 52px; height: 5px; border-radius: 999px; background: var(--app-text-muted); margin: 10px auto 6px; flex: 0 0 auto; }
+.sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 8px 20px 12px; flex: 0 0 auto; }
+.sheet-title { font-size: 20px; font-weight: 800; color: var(--app-heading); }
+.sheet-subtitle { margin-top: 4px; font-size: 13px; color: var(--app-text-soft); }
+
+.sheet-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.sheet-body { padding: 0 20px 18px; overflow-y: auto; min-height: 0; }
+.preview-card {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+}
+
+.preview-card img,
+.preview-card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.preview-loading { display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--app-text); }
+.preview-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(37, 99, 235, 0.16); border-top: 3px solid #2563eb; animation: detailSpin .8s linear infinite; }
+.preview-progress { font-weight: 700; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; background: var(--app-surface-2); color: var(--app-text); font-size: 12px; font-weight: 700; }
+.chip.processing { background: rgba(37,99,235,0.14); color: #1d4ed8; }
+.detail-block { margin-bottom: 16px; }
+.detail-label { font-size: 12px; font-weight: 800; color: var(--app-text-soft); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.prompt-box { background: var(--app-surface-2); border: 1px solid var(--app-border); border-radius: 16px; padding: 14px; font-size: 14px; line-height: 1.6; color: var(--app-text); white-space: pre-wrap; word-break: break-word; }
+.detail-grid { display: grid; gap: 10px; }
+.detail-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; padding: 12px 14px; border-radius: 14px; background: var(--app-surface-2); border: 1px solid var(--app-border); }
+.k { font-size: 13px; font-weight: 700; color: var(--app-text-soft); }
+.v { font-size: 14px; color: var(--app-text); word-break: break-word; }
+.v.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.sheet-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px 18px; border-top: 1px solid var(--app-border); background: color-mix(in srgb, var(--app-surface) 96%, transparent); flex: 0 0 auto; }
+.btn { min-width: 110px; height: 42px; padding: 0 16px; border: 1px solid transparent; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn-ghost { background: var(--app-surface); color: var(--app-text); border-color: var(--app-border); }
+.btn-primary { background: #2563eb; color: #ffffff; }
+
+@keyframes sheetUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(26px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes detailSpin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .detail-sheet { width: 100%; max-height: 84dvh; border-radius: 24px 24px 0 0; }
+  .sheet-head, .sheet-body, .sheet-actions { padding-left: 16px; padding-right: 16px; }
+}

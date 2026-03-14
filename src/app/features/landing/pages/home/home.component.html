@@ -1,0 +1,59 @@
+<section class="landing-page">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">PaintingAI Studio</div>
+      <h1>Create stunning AI visuals with a polished creative workflow.</h1>
+      <p>
+        Explore presets, organize stacks, manage favorites, and turn prompts into beautiful image and video outputs in one place.
+      </p>
+
+      <div class="hero-actions">
+        <a class="primary-btn" routerLink="/auth/register">Start free</a>
+        <a class="ghost-btn" routerLink="/auth/login">Sign in</a>
+      </div>
+
+      <div class="hero-chips">
+        <span>Prompt to image</span>
+        <span>Stacks & collections</span>
+        <span>Video generation</span>
+      </div>
+    </div>
+
+    <div class="hero-showcase">
+      <div class="showcase-card featured">
+        <img [src]="images[0]" alt="featured artwork">
+      </div>
+      <div class="showcase-stack">
+        <div class="showcase-card" *ngFor="let img of images.slice(1,5)">
+          <img [src]="img" alt="artwork preview">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">Explore</div>
+      <h2>Popular styles and community picks</h2>
+    </div>
+    <div class="filter-bar">
+      <button class="nav-btn" (click)="scroll(-1)">◀</button>
+      <div class="filter-scroll" #filterScroll>
+        <button class="filter-btn active">Trend</button>
+        <button class="filter-btn">Anime</button>
+        <button class="filter-btn">Realistic</button>
+        <button class="filter-btn">GIF</button>
+        <button class="filter-btn">Cyberpunk</button>
+        <button class="filter-btn">Fantasy</button>
+        <button class="filter-btn">Portrait</button>
+      </div>
+      <button class="nav-btn" (click)="scroll(1)">▶</button>
+    </div>
+  </div>
+
+  <div class="image-grid">
+    <div class="image-card" *ngFor="let img of images">
+      <img [src]="img" alt="generated artwork" />
+    </div>
+  </div>
+</section>

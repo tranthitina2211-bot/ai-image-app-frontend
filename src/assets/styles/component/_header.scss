@@ -1,0 +1,76 @@
+/*******************
+ Topbar
+*******************/
+mat-toolbar {
+  box-shadow: 1px 0px 10px rgba(0, 0, 0, 0.18);
+
+  &.topbar {
+    padding: 0px 15px;
+    background: var(--app-surface) !important;
+    color: var(--app-text) !important;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .navbar-header {
+    text-align: center;
+
+    .navbar-brand {
+      display: flex;
+      line-height: 18px;
+      align-items: center;
+      color: var(--app-text);
+
+      .dark-logo {
+        display: none;
+      }
+
+      b {
+        margin-right: 5px;
+      }
+    }
+  }
+
+  .profile-pic {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 100%;
+    border: 1px solid var(--app-border);
+  }
+}
+
+/*******************
+ Topbar
+*******************/
+.topbar {
+  position: relative;
+  z-index: 2;
+}
+
+.example-sidenav-container {
+  flex: 1;
+}
+
+.example-sidenav-container {
+  flex: 1 0 auto;
+}
+
+/* Header actions / buttons / menu */
+app-header,
+app-header * {
+  color: var(--app-text);
+}
+
+.join-btn {
+  color: #fff !important;
+}
+
+.mat-mdc-menu-panel {
+  background: var(--app-surface) !important;
+  border: 1px solid var(--app-border);
+}
+
+.mat-mdc-menu-item,
+.mat-mdc-menu-item .mat-icon,
+.mat-mdc-menu-item .mdc-list-item__primary-text {
+  color: var(--app-text) !important;
+}

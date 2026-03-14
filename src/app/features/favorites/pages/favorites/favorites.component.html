@@ -1,0 +1,53 @@
+<div
+  class="favorites-page"
+  [class.near-bottom]="isNearBottom"
+  [class.is-collections-tab]="(tab$ | async) === 'collections'">
+
+  <div class="tabs" [attr.data-active]="(tab$ | async) ?? 'all'">
+    <button class="tab" type="button" (click)="setTab('all')" [class.active]="(tab$ | async) === 'all'">
+      All favorites
+    </button>
+
+    <button class="tab" type="button" (click)="setTab('collections')" [class.active]="(tab$ | async) === 'collections'">
+      Collections
+    </button>
+
+    <span class="tab-indicator"></span>
+  </div>
+
+  <ng-container *ngIf="(tab$ | async) === 'all'; else collectionsTab">
+    <div class="toolbar">
+      <div class="search">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search favorites…"
+          (input)="setQuery(($any($event.target)).value)" />
+      </div>
+
+      <div class="filter" [attr.data-type]="(typeFilter$ | async) ?? 'all'">
+        <button class="filter-btn" type="button" (click)="setTypeFilter('all')">All</button>
+        <button class="filter-btn" type="button" (click)="setTypeFilter('image')">Images</button>
+        <button class="filter-btn" type="button" (click)="setTypeFilter('video')">Videos</button>
+        <span class="filter-indicator" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <div class="favorites-cdk-wrap">
+      <app-grid-container
+        [context]="context"
+        [view]="'list'"
+        [items]="(fav$ | async) ?? []"
+        (nearBottomChange)="onNearBottomChange($event)">
+      </app-grid-container>
+    </div>
+  </ng-container>
+
+  <ng-template #collectionsTab>
+    <div class="collections-wrap">
+      <app-collections></app-collections>
+      <div class="collections-end-space" aria-hidden="true"></div>
+    </div>
+  </ng-template>
+
+</div>

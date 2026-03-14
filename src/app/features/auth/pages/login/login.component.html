@@ -1,0 +1,71 @@
+<div class="auth-shell">
+  <section class="auth-panel auth-panel--hero">
+    <div class="eyebrow">Painting AI Studio</div>
+    <h1>Welcome back to your creative workspace.</h1>
+    <p>
+      Generate, organize, and upscale your AI images in one clean dashboard.
+    </p>
+
+    <div class="hero-stats">
+      <div>
+        <strong>8.4k</strong>
+        <span>renders this week</span>
+      </div>
+      <div>
+        <strong>96%</strong>
+        <span>successful jobs</span>
+      </div>
+      <div>
+        <strong>Pro</strong>
+        <span>fast queue enabled</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="auth-panel auth-panel--form">
+    <div class="panel-head">
+      <h2>Sign in</h2>
+      <p>Continue where you left off.</p>
+    </div>
+
+    <div class="form-alert error" *ngIf="error">{{ error }}</div>
+
+    <form class="auth-form" (ngSubmit)="submit()">
+      <label>
+        <span>Email</span>
+        <input type="email" [(ngModel)]="email" name="email" placeholder="you@example.com" [class.input-error]="!!getFieldError('email')" />
+        <small class="field-error" *ngIf="getFieldError('email')">{{ getFieldError('email') }}</small>
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Enter your password" [class.input-error]="!!getFieldError('password')" />
+        <small class="field-error" *ngIf="getFieldError('password')">{{ getFieldError('password') }}</small>
+      </label>
+
+      <div class="form-row">
+        <label class="checkbox">
+          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+          <span>Remember me</span>
+        </label>
+
+        <a routerLink="/auth/forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="primary-btn" [disabled]="loading">{{ loading ? 'Signing in...' : 'Sign in' }}</button>
+
+      <div class="social-divider"><span>or continue with</span></div>
+
+      <div class="social-grid">
+        <button type="button" class="ghost-btn social-btn" (click)="socialLogin('google')">Google</button>
+        <button type="button" class="ghost-btn social-btn" (click)="socialLogin('github')">GitHub</button>
+        <button type="button" class="ghost-btn social-btn" (click)="socialLogin('facebook')">Facebook</button>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      New here?
+      <a routerLink="/auth/register">Create an account</a>
+    </div>
+  </section>
+</div>

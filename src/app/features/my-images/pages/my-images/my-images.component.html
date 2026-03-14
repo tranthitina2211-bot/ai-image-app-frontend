@@ -1,0 +1,112 @@
+<div class="my-images-page" [class.near-bottom]="isNearBottom">
+  <div class="tabs" [attr.data-active]="tab">
+    <button class="tab" (click)="setTab('all')" [class.active]="tab === 'all'">
+      All
+    </button>
+
+    <button class="tab" (click)="setTab('by-day')" [class.active]="tab === 'by-day'">
+      By day
+    </button>
+
+    <span class="tab-indicator" aria-hidden="true"></span>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Search prompt, ratio, seed…"
+        (input)="setQuery(($any($event.target)).value)" />
+    </div>
+
+    <div class="filter" [attr.data-type]="(typeFilter$ | async) ?? 'all'">
+      <button class="filter-btn" type="button" (click)="setTypeFilter('all')">All</button>
+      <button class="filter-btn" type="button" (click)="setTypeFilter('image')">Images</button>
+      <button class="filter-btn" type="button" (click)="setTypeFilter('video')">Videos</button>
+      <span class="filter-indicator" aria-hidden="true"></span>
+    </div>
+
+    <button class="select-btn" type="button" (click)="toggleSelectMode()">
+      <span class="material-icons">{{ selectMode ? 'close' : 'done_all' }}</span>
+      <span class="txt">{{ selectMode ? 'Cancel' : 'Select' }}</span>
+    </button>
+  </div>
+
+  <ng-container *ngIf="gridSize$ | async as gridSize">
+    <ng-container *ngIf="tab === 'all'">
+      <div class="my-images-cdk-wrap" [attr.data-grid-size]="gridSize">
+        <app-grid-container
+          [context]="context"
+          [view]="'list'"
+          [items]="(all$ | async) ?? []"
+          [gridSize]="gridSize"
+          [selectMode]="selectMode"
+          [selectedIds]="selectedIds"
+          (selectionChange)="onSelectionChange($event)"
+          (nearBottomChange)="onNearBottomChange($event)">
+        </app-grid-container>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="tab === 'by-day'">
+      <ng-container *ngIf="(selectedDayKey$ | async) === null; else dayDetail">
+        <div class="byday-scroll">
+          <div class="folder-grid" [attr.data-grid-size]="gridSize" *ngIf="groups$ | async as groups">
+            <app-day-folder-card
+              *ngFor="let g of groups; trackBy: trackByDay"
+              [dayKey]="g.dayKey"
+              [count]="g.items.length"
+              [cover]="g.items[0]"
+              (click)="openFolder(g.dayKey)">
+            </app-day-folder-card>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #dayDetail>
+        <ng-container *ngIf="(selectedDayKey$ | async) as dayKey">
+          <div class="day-header">
+            <button class="back" (click)="backToFolders()">← Back</button>
+            <div class="title">{{ dayKey }}</div>
+            <div class="count">{{ (dayItems$ | async)?.length ?? 0 }} items</div>
+          </div>
+
+          <div class="my-images-cdk-wrap" [attr.data-grid-size]="gridSize">
+            <app-grid-container
+              [context]="context"
+              [view]="'list'"
+              [items]="(dayItems$ | async) ?? []"
+              [gridSize]="gridSize"
+              [selectMode]="selectMode"
+              [selectedIds]="selectedIds"
+              (selectionChange)="onSelectionChange($event)"
+              (nearBottomChange)="onNearBottomChange($event)">
+            </app-grid-container>
+          </div>
+        </ng-container>
+      </ng-template>
+    </ng-container>
+  </ng-container>
+
+  <div class="bulk-bar" *ngIf="selectMode">
+    <div class="count">{{ selectedIds.size }} selected</div>
+
+    <div class="actions">
+      <button type="button" (click)="bulkFavorite(true)">
+        <span class="material-icons">favorite</span>
+        Fav
+      </button>
+
+      <button type="button" (click)="bulkFavorite(false)">
+        <span class="material-icons">heart_broken</span>
+        Unfav
+      </button>
+
+      <button class="danger" type="button" (click)="bulkDelete()">
+        <span class="material-icons">delete</span>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

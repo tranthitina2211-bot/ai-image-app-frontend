@@ -1,0 +1,53 @@
+<div class="auth-shell auth-shell--register">
+  <section class="auth-panel auth-panel--form">
+    <div class="panel-head">
+      <h2>Create your account</h2>
+      <p>Start building image stacks and collections in minutes.</p>
+    </div>
+
+    <div class="form-alert error" *ngIf="error">{{ error }}</div>
+
+    <form class="auth-form" (ngSubmit)="submit()">
+      <label>
+        <span>Display name</span>
+        <input type="text" [(ngModel)]="name" name="name" placeholder="Your name" [class.input-error]="!!getFieldError('name')" />
+        <small class="field-error" *ngIf="getFieldError('name')">{{ getFieldError('name') }}</small>
+      </label>
+
+      <label>
+        <span>Email</span>
+        <input type="email" [(ngModel)]="email" name="email" placeholder="you@example.com" [class.input-error]="!!getFieldError('email')" />
+        <small class="field-error" *ngIf="getFieldError('email')">{{ getFieldError('email') }}</small>
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Create a password" [class.input-error]="!!getFieldError('password')" />
+        <small class="field-error" *ngIf="getFieldError('password')">{{ getFieldError('password') }}</small>
+      </label>
+
+      <label>
+        <span>Confirm password</span>
+        <input type="password" [(ngModel)]="passwordConfirmation" name="password_confirmation" placeholder="Confirm your password" [class.input-error]="!!getFieldError('password_confirmation')" />
+        <small class="field-error" *ngIf="getFieldError('password_confirmation')">{{ getFieldError('password_confirmation') }}</small>
+      </label>
+
+      <button type="submit" class="primary-btn" [disabled]="loading">{{ loading ? 'Creating account...' : 'Create account' }}</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account?
+      <a routerLink="/auth/login">Sign in</a>
+    </div>
+  </section>
+
+  <section class="auth-panel auth-panel--highlights">
+    <div class="eyebrow">Why creators use Painting AI</div>
+    <h1>From prompt to polished collection faster.</h1>
+    <ul>
+      <li>Multi-variation generation workflow</li>
+      <li>Favorites, collections, and stack browsing</li>
+      <li>Billing and notifications ready for production UI</li>
+    </ul>
+  </section>
+</div>

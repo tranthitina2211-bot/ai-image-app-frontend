@@ -1,0 +1,42 @@
+.dialog-shell {
+  width: 100%;
+  max-width: 420px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  border-radius: 20px;
+  box-shadow: var(--app-shadow);
+  padding: 20px;
+  overflow-x: hidden;
+  border: 1px solid var(--app-border);
+}
+
+.dialog-head { margin-bottom: 10px; }
+.dialog-title { font-size: 20px; font-weight: 700; line-height: 1.3; color: var(--app-heading); }
+.dialog-body { margin-bottom: 20px; }
+.dialog-message { margin: 0; font-size: 15px; line-height: 1.6; color: var(--app-text-soft); word-break: break-word; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+  min-width: 96px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.btn-ghost { background: var(--app-surface); color: var(--app-text); border-color: var(--app-border); }
+.btn-ghost:hover { background: var(--app-surface-2); }
+.btn-danger { background: #ef4444; color: #ffffff; }
+.btn-danger:hover { background: #dc2626; }
+
+@media (max-width: 576px) {
+  .dialog-shell { max-width: 100%; border-radius: 18px; padding: 16px; }
+  .dialog-title { font-size: 18px; }
+  .dialog-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .btn { width: 100%; min-width: 0; }
+}
+@media (max-width: 420px) { .dialog-actions { grid-template-columns: 1fr; } }

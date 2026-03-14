@@ -1,0 +1,37 @@
+<div class="notifications-page">
+  <div class="page-hero">
+    <div>
+      <div class="eyebrow">Inbox</div>
+      <h1>Notifications</h1>
+      <p>Track render updates, billing alerts, and system announcements.</p>
+    </div>
+
+    <button class="mark-all" type="button" (click)="notifications.markAllAsRead()">
+      Mark all as read
+    </button>
+  </div>
+
+  <div class="filters">
+    <button [class.active]="activeFilter === 'all'" (click)="activeFilter = 'all'">All</button>
+    <button [class.active]="activeFilter === 'generate'" (click)="activeFilter = 'generate'">Generate</button>
+    <button [class.active]="activeFilter === 'billing'" (click)="activeFilter = 'billing'">Billing</button>
+    <button [class.active]="activeFilter === 'system'" (click)="activeFilter = 'system'">System</button>
+  </div>
+
+  <div class="notification-list">
+    <article class="notification-card" *ngFor="let item of items" [class.unread]="item.unread">
+      <div class="icon-wrap"><mat-icon>{{ item.icon }}</mat-icon></div>
+      <div class="content">
+        <div class="top-line">
+          <h3>{{ item.title }}</h3>
+          <span>{{ item.time }}</span>
+        </div>
+        <p>{{ item.message }}</p>
+        <div class="actions">
+          <a [routerLink]="item.route">Open</a>
+          <button type="button" (click)="notifications.markAsRead(item.id)">Mark as read</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>

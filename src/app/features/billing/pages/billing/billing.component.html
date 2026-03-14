@@ -1,0 +1,51 @@
+<div class="billing-page">
+  <section class="billing-hero">
+    <div>
+      <div class="eyebrow">Billing & payment</div>
+      <h1>Choose a plan that matches your creative volume.</h1>
+      <p>Upgrade instantly with secure hosted checkout and keep your plan in sync.</p>
+      <div class="status-banner success" *ngIf="message">{{ message }}</div>
+      <div class="status-banner error" *ngIf="error">{{ error }}</div>
+    </div>
+
+    <div class="current-plan">
+      <span>Current plan</span>
+      <strong>{{ overview?.currentPlan || authState.currentUser.plan }}</strong>
+      <small *ngIf="overview?.renewsOn">Renews on {{ overview?.renewsOn }}</small>
+      <small *ngIf="!overview?.renewsOn">No renewal scheduled</small>
+    </div>
+  </section>
+
+  <section class="plan-grid">
+    <article class="plan-card" *ngFor="let plan of plans" [class.highlight]="plan.highlight">
+      <div class="plan-tag" *ngIf="plan.highlight">Most popular</div>
+      <h3>{{ plan.name }}</h3>
+      <div class="price">{{ plan.price }}<span>/month</span></div>
+      <p>{{ plan.desc }}</p>
+      <ul>
+        <li *ngFor="let feature of plan.features">{{ feature }}</li>
+      </ul>
+      <button type="button" (click)="selectPlan(plan)" [disabled]="checkoutLoadingCode === plan.code">
+        {{ checkoutLoadingCode === plan.code ? 'Redirecting...' : ('Select ' + plan.name) }}
+      </button>
+    </article>
+  </section>
+
+  <section class="billing-grid">
+    <div class="panel">
+      <h3>Payment method</h3>
+      <div class="card-preview">
+        <div>{{ overview?.paymentProvider || 'Stripe' }}</div>
+        <strong>{{ overview?.paymentMethodLabel || 'Hosted checkout' }}</strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Recent invoices</h3>
+      <div class="invoice-row" *ngFor="let invoice of overview?.invoices || []">
+        <span>{{ invoice.label }} · {{ invoice.status }}</span>
+        <strong>{{ invoice.amount }}</strong>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,47 @@
+<ng-container *ngIf="vm$ | async as vm">
+  <div class="detail-header" *ngIf="vm.collection as col">
+    <button class="btn back-btn" type="button" (click)="back()">← Back</button>
+
+    <div class="mid">
+      <div class="title" [title]="col.name">{{ col.name }}</div>
+      <div class="sub">{{ col.itemIds.length }} items</div>
+    </div>
+
+    <div class="right">
+      <button class="btn" type="button" (click)="rename(col.id, col.name)">Rename</button>
+      <button class="btn danger" type="button" (click)="delete(col.id)">Delete</button>
+    </div>
+  </div>
+
+  <div
+    class="grid"
+    *ngIf="vm.collection as col"
+    cdkDropList
+    [cdkDropListData]="vm.items"
+    (cdkDropListDropped)="drop($event, col.id)">
+
+    <div
+      class="cell"
+      *ngFor="let item of vm.items; let i = index; trackBy: trackById"
+      cdkDrag>
+
+      <div class="thumb" (click)="openOverlay(vm.items, i)">
+        <img *ngIf="item.type === 'image'" [src]="item.url" alt="" />
+        <video *ngIf="item.type === 'video'" [src]="item.url" muted playsinline></video>
+      </div>
+
+      <div class="cell-actions" (click)="$event.stopPropagation()">
+        <button class="icon" type="button" title="Remove" (click)="removeItem(col.id, item.id)">
+          ✖
+        </button>
+        <span class="drag-hint" cdkDragHandle title="Drag">⠿</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty" *ngIf="vm.collection && vm.items.length === 0">
+    <div class="empty-title">This collection is empty</div>
+    <div class="empty-sub">Open a favorite item and use “Add to collection”.</div>
+  </div>
+  <div class="end-space"></div>
+</ng-container>

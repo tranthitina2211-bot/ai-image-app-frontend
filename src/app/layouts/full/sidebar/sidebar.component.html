@@ -1,0 +1,21 @@
+<div class="sidebar-shell">
+  <div class="sidebar-user">
+    <div class="avatar-wrap">
+      <img [src]="user.avatar" alt="user avatar">
+    </div>
+    <div class="user-copy">
+      <strong>{{ user.name }}</strong>
+      <span>{{ user.plan }} plan</span>
+    </div>
+  </div>
+
+  <mat-nav-list appAccordion>
+    <mat-list-item appAccordionLink *ngFor="let menuitem of menuItems.getMenuitem()" routerLinkActive="selected">
+      <a appAccordionToggle [routerLink]="menuitem.route" *ngIf="menuitem.type === 'link'">
+        <mat-icon>{{ menuitem.icon }}</mat-icon>
+        <span>{{ menuitem.name }}</span>
+        <span fxFlex></span>
+      </a>
+    </mat-list-item>
+  </mat-nav-list>
+</div>

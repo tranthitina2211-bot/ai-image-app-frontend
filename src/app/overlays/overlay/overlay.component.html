@@ -1,0 +1,26 @@
+<div class="overlay" *ngIf="payload">
+  <div class="overlay-backdrop" (click)="close()"></div>
+
+  <div class="overlay-content" #content>
+    <button class="overlay-close" (click)="close()">✕</button>
+
+    <app-stack
+      *ngIf="stack"
+      [items]="stack"
+      [actions]="actions"
+      [mode]="payload!.mode"
+      [startIndex]="currentIndex"
+      [overlayContext]="payload.context"
+      (indexChange)="currentIndex = $event; syncCurrentItemId()"
+      (cancel)="onCancel($event)"
+      (actionClick)="onActionClick($event)">
+    </app-stack>
+
+    <app-item-detail-sheet
+      *ngIf="detailSheetOpen"
+      [item]="detailItem"
+      (closeSheet)="closeDetailSheet()"
+      (copyPrompt)="copyPromptFromSheet()">
+    </app-item-detail-sheet>
+  </div>
+</div>

@@ -1,0 +1,225 @@
+<div class="settings-page" *ngIf="vm$ | async as vm">
+  <div class="settings-shell">
+
+    <div class="page-header">
+      <div class="eyebrow">Preferences</div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">
+        Manage your profile, generation defaults, and interface preferences.
+      </p>
+    </div>
+
+    <section class="settings-card">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Account</div>
+          <h2 class="section-title">Profile</h2>
+        </div>
+      </div>
+
+      <div class="profile-block">
+        <div class="avatar-box">
+          <ng-container *ngIf="vm.settings.profile.avatarUrl; else avatarFallback">
+            <img class="avatar-img" [src]="vm.settings.profile.avatarUrl" alt="avatar">
+          </ng-container>
+
+          <ng-template #avatarFallback>
+            <div class="avatar-fallback">
+              {{ (vm.settings.profile.displayName || 'G').charAt(0).toUpperCase() }}
+            </div>
+          </ng-template>
+        </div>
+
+        <div class="profile-fields">
+          <div class="field-row">
+            <label class="field-label">Display name</label>
+            <input
+              class="app-input"
+              type="text"
+              [value]="vm.settings.profile.displayName"
+              (input)="updateDisplayName($any($event.target).value)" />
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Gender</label>
+            <select class="app-select" [value]="vm.settings.profile.gender" (change)="updateGender($any($event.target).value)">
+              <option *ngFor="let option of genderOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Birth year</label>
+            <input
+              class="app-input"
+              type="number"
+              min="1900"
+              max="2100"
+              [value]="vm.settings.profile.birthYear ?? ''"
+              (input)="updateBirthYear($any($event.target).value)" />
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Phone number</label>
+            <input
+              class="app-input"
+              type="tel"
+              [value]="vm.settings.profile.phone"
+              (input)="updatePhone($any($event.target).value)"
+              placeholder="+84..." />
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Avatar URL</label>
+            <input
+              class="app-input"
+              type="text"
+              [value]="vm.settings.profile.avatarUrl"
+              (input)="updateAvatarUrl($any($event.target).value)"
+              placeholder="https://..." />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">AI</div>
+          <h2 class="section-title">Generation</h2>
+        </div>
+      </div>
+
+      <div class="settings-list">
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Default ratio</div>
+            <div class="hint">Default aspect ratio for new generations.</div>
+          </div>
+
+          <div class="setting-control">
+            <select class="app-select" [value]="vm.settings.defaultRatio" (change)="updateDefaultRatio($any($event.target).value)">
+              <option *ngFor="let option of ratioOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Auto open result</div>
+            <div class="hint">Automatically open the result overlay after generate finishes.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" [checked]="vm.settings.autoOpenResult" (change)="toggleAutoOpenResult($any($event.target).checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Auto save prompt</div>
+            <div class="hint">Save your latest prompt so it can be restored later.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" [checked]="vm.settings.autoSavePrompt" (change)="toggleAutoSavePrompt($any($event.target).checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Display</div>
+          <h2 class="section-title">Interface</h2>
+        </div>
+      </div>
+
+      <div class="settings-list">
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Theme</div>
+            <div class="hint">Choose the appearance of the application.</div>
+          </div>
+
+          <div class="setting-control">
+            <select class="app-select" [value]="vm.settings.theme" (change)="updateTheme($any($event.target).value)">
+              <option *ngFor="let option of themeOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Grid size</div>
+            <div class="hint">Change gallery item size in media views.</div>
+          </div>
+
+          <div class="setting-control">
+            <select class="app-select" [value]="vm.settings.gridSize" (change)="updateGridSize($any($event.target).value)">
+              <option *ngFor="let option of gridSizeOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Preview autoplay video</div>
+            <div class="hint">Enable autoplay for video previews and cards.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" [checked]="vm.settings.autoplayVideoPreview" (change)="toggleAutoplayVideoPreview($any($event.target).checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-meta">
+            <div class="label">Confirm before delete</div>
+            <div class="hint">Ask for confirmation before deleting items.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" [checked]="vm.settings.confirmBeforeDelete" (change)="toggleConfirmBeforeDelete($any($event.target).checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Info</div>
+          <h2 class="section-title">About</h2>
+        </div>
+      </div>
+
+      <div class="settings-list">
+        <div class="setting-row static">
+          <div class="setting-meta">
+            <div class="label">App version</div>
+            <div class="hint">Current local build version.</div>
+          </div>
+
+          <div class="value-pill">{{ vm.version }}</div>
+        </div>
+
+        <button class="setting-row action danger" type="button" (click)="resetSettings()">
+          <div class="setting-meta">
+            <div class="label">Reset settings</div>
+            <div class="hint">Restore all settings and profile values to defaults.</div>
+          </div>
+
+          <div class="action-arrow">↺</div>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="end-space"></div>
+</div>

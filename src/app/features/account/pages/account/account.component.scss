@@ -1,0 +1,13 @@
+:host { display:block; }
+.account-page { padding:28px 32px 160px; }
+.hero-card, .panel { border:1px solid var(--app-border); background:var(--app-surface); box-shadow:var(--app-shadow); border-radius:24px; }
+.hero-card { display:flex; gap:18px; align-items:center; padding:24px; margin-bottom:22px; }
+.hero-card img { width:88px; height:88px; border-radius:24px; object-fit:cover; }
+.eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.16em; color:var(--app-accent-2); font-weight:700; }
+h1 { margin:6px 0; }
+.account-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:18px; }
+.panel { padding:22px; }
+.field, .pref { display:flex; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--app-border); }
+.field:last-child, .pref:last-child { border-bottom:none; }
+span { color:var(--app-text-soft); }
+@media (max-width: 800px) { .account-page { padding:20px 16px 180px; } .hero-card, .account-grid { grid-template-columns:1fr; display:grid; } }
