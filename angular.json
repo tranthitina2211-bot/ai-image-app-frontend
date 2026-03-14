@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "material-pro-angular-lite": {
+    "ai-image-app-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -20,7 +20,7 @@
             "allowedCommonJsDependencies": [
               "apexcharts"
             ],
-            "outputPath": "dist/material-pro-angular-lite",
+            "outputPath": "dist/ai-image-app-frontend",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -69,10 +69,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "material-pro-angular-lite:build:production"
+              "browserTarget": "ai-image-app-frontend:build:production"
             },
             "development": {
-              "browserTarget": "material-pro-angular-lite:build:development"
+              "browserTarget": "ai-image-app-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -80,7 +80,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "material-pro-angular-lite:build"
+            "browserTarget": "ai-image-app-frontend:build"
           }
         },
         "test": {
