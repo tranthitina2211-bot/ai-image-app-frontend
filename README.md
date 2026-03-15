@@ -2,42 +2,56 @@
 
 Frontend Angular cho hệ thống tạo ảnh/video AI.
 
-## Công nghệ
+## Công nghệ sử dụng
 
 - Angular
 - Angular Material
 - RxJS
+- SCSS
+
+## Yêu cầu môi trường
+
+- Node.js 18+
+- npm 9+
+- Angular CLI
 
 ## Cài đặt
 
+```bash
 npm install
 
-## Chạy local
+Chạy local
+ng serve
 
-npm install
-Truy cập: http://localhost:4200
+Sau đó mở trình duyệt:
 
-## Build production
+http://localhost:4200
+Build production
 npm run build
+Cấu hình API
 
-## Cấu hình api
+Chỉnh trong file:
+
 src/environments/environment.ts
+
+Ví dụ:
+
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8000'
+  apiBaseUrl: 'http://127.0.0.1:8000'
 };
+Chức năng chính
 
-## Chức năng
-* login / register
-* generate image
-* media gallery
-* collections
-* favorites
-* settings
-* payments.
+đăng nhập / đăng ký
 
-## Commit
+generate image
 
-git add README.md
-git commit -m "rewrite frontend README"
-git push
+generate video từ image
+
+media gallery
+
+favorites
+
+collections
+
+settings
