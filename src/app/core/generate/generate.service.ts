@@ -4,13 +4,47 @@ import { MediaService } from '@services/media.service';
 import { OverlayService } from '@services/overlay.service';
 import { SettingsService } from '@services/settings.service';
 
-import { MediaItem } from '@models/media.model';
+import { MediaItem, MediaType } from '@models/media.model';
 import { GeneratePayload } from 'src/app/core/generate/generate.types';
 import { GenerateApiService } from './generate-api.service';
 
+type PollingJobStatus = 'queued' | 'generating' | 'done' | 'failed' | 'cancelled';
+
+interface GenerationCreateResponse {
+  jobId?: string;
+  status?: PollingJobStatus;
+  progress?: number;
+  mediaItemId?: string;
+}
+
+interface GenerationMultiCreateResponse {
+  jobs?: Array<{
+    jobId?: string;
+    status?: PollingJobStatus;
+    progress?: number;
+    mediaItemId?: string;
+  }>;
+}
+
+interface GenerationStatusResponse {
+  jobId: string;
+  status: PollingJobStatus;
+  progress: number;
+  error?: string | null;
+  providerJobId?: string | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  cancelledAt?: string | null;
+  mediaItemId?: string | null;
+  resultUrl?: string | null;
+  mediaStatus?: 'processing' | 'success' | 'error' | null;
+  mediaType?: MediaType | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GenerateService {
-  private jobs = new Map<string, any>();
+  private jobs = new Map<string, number>();
+  private pending = new Set<string>();
 
   constructor(
     private mediaService: MediaService,
@@ -22,14 +56,18 @@ export class GenerateService {
 
   generate(payload: GeneratePayload) {
     console.log('[GENERATE] create job', payload);
+
     this.generateApi.createJob(payload).subscribe({
-      next: (res) => {
-        const item = this.extractMedia(res)[0];
-        if (item) {
-          this.mediaService.add(item);
+      next: (res: GenerationCreateResponse) => {
+        const jobId = typeof res?.jobId === 'string' ? res.jobId : '';
+        if (!jobId) {
+          console.error('[GENERATE] create job response missing jobId', res);
+          return;
         }
-        const jobIds = this.extractJobIds(res);
-        jobIds.forEach(jobId => this.startPolling(jobId, item?.id));
+
+        const optimistic = this.createOptimisticFromPayload(jobId, payload, res);
+        this.mediaService.add(optimistic);
+        this.startPolling(jobId, optimistic.id);
       },
       error: (error) => console.error('[GENERATE] create job failed', error)
     });
@@ -37,24 +75,75 @@ export class GenerateService {
 
   upscale(base: MediaItem) {
     console.log('[GENERATE] upscale', base);
+
     this.generateApi.upscale(base.id).subscribe({
-      next: (res) => this.handleDerivedJobCreated(res, base),
+      next: (res: GenerationCreateResponse) => {
+        const jobId = typeof res?.jobId === 'string' ? res.jobId : '';
+        if (!jobId) {
+          console.error('[GENERATE] upscale response missing jobId', res);
+          return;
+        }
+
+        const optimistic = this.createOptimisticFromBase(jobId, base, res, base.type, {
+          url: base.url,
+          parentId: base.id
+        });
+
+        this.mediaService.add(optimistic);
+        this.startPolling(jobId, optimistic.id, base.id_stack);
+      },
       error: (error) => console.error('[GENERATE] upscale failed', error)
     });
   }
 
   variation(base: MediaItem) {
     console.log('[GENERATE] variation x4 start', base);
+
     this.generateApi.variation(base.id).subscribe({
-      next: (res) => this.handleDerivedJobCreated(res, base),
+      next: (res: GenerationMultiCreateResponse) => {
+        const jobs = Array.isArray(res?.jobs) ? res.jobs : [];
+        if (!jobs.length) {
+          console.error('[GENERATE] variation response missing jobs', res);
+          return;
+        }
+
+        jobs.forEach((jobRes, index) => {
+          const jobId = typeof jobRes?.jobId === 'string' ? jobRes.jobId : '';
+          if (!jobId) return;
+
+          const optimistic = this.createOptimisticFromBase(jobId, base, jobRes, base.type, {
+            url: base.url,
+            parentId: base.id,
+            orderOffset: index + 1
+          });
+
+          this.mediaService.add(optimistic);
+          this.startPolling(jobId, optimistic.id, base.id_stack);
+        });
+      },
       error: (error) => console.error('[GENERATE] variation failed', error)
     });
   }
 
   imageToVideo(base: MediaItem) {
     console.log('[GENERATE] image to video', base);
+
     this.generateApi.imageToVideo(base.id).subscribe({
-      next: (res) => this.handleDerivedJobCreated(res, base),
+      next: (res: GenerationCreateResponse) => {
+        const jobId = typeof res?.jobId === 'string' ? res.jobId : '';
+        if (!jobId) {
+          console.error('[GENERATE] image to video response missing jobId', res);
+          return;
+        }
+
+        const optimistic = this.createOptimisticFromBase(jobId, base, res, 'video', {
+          url: base.url,
+          parentId: base.id
+        });
+
+        this.mediaService.add(optimistic);
+        this.startPolling(jobId, optimistic.id, base.id_stack);
+      },
       error: (error) => console.error('[GENERATE] image to video failed', error)
     });
   }
@@ -64,11 +153,7 @@ export class GenerateService {
     if (!jobId) return;
 
     console.log('[GENERATE] cancel requested', { itemId: item.id, jobId });
-    const timer = this.jobs.get(jobId);
-    if (timer) {
-      clearInterval(timer);
-      this.jobs.delete(jobId);
-    }
+    this.stopPolling(jobId);
 
     this.mediaService.remove(item.id, false);
     this.generateApi.cancel(jobId).subscribe({
@@ -80,102 +165,230 @@ export class GenerateService {
     });
   }
 
-  private handleDerivedJobCreated(res: any, base: MediaItem): void {
-    const items = this.extractMedia(res);
-    items.forEach((item, index) => {
-      item.order_in_board = base.order_in_board;
-      item.order_in_stack = (base.order_in_stack ?? 0) + index + 1;
-      this.mediaService.add(item);
-    });
+  private startPolling(jobId: string, mediaId: string, stackIdForAutoOpen?: string): void {
+    if (!jobId) return;
 
-    const jobIds = this.extractJobIds(res);
-    jobIds.forEach((jobId, index) => this.startPolling(jobId, items[index]?.id, base.id_stack));
+    this.stopPolling(jobId);
+    this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 0);
   }
 
-  private extractJobIds(res: any): string[] {
-    if (Array.isArray(res?.jobIds)) {
-      return res.jobIds.filter((value: unknown): value is string => typeof value === 'string');
-    }
+  private scheduleNextPoll(
+    jobId: string,
+    mediaId: string,
+    stackIdForAutoOpen?: string,
+    delayMs = 1200
+  ): void {
+    const timeoutId = window.setTimeout(() => {
+      this.pollOnce(jobId, mediaId, stackIdForAutoOpen);
+    }, delayMs);
 
-    if (Array.isArray(res?.jobs?.data)) {
-      return res.jobs.data.map((job: any) => job?.id).filter((value: unknown): value is string => typeof value === 'string');
-    }
-    const single = res?.jobId ?? res?.job?.id;
-    return single ? [single] : [];
+    this.jobs.set(jobId, timeoutId);
   }
 
-  private startPolling(jobId: string, optimisticMediaId?: string, stackIdForAutoOpen?: string): void {
-    const tick = setInterval(() => {
-      this.generateApi.checkStatus(jobId).subscribe({
-        next: (job) => {
-          const status = job?.status;
-          const results = Array.isArray(job?.results?.data)
-            ? job.results.data
-            : Array.isArray(job?.results)
-              ? job.results
-              : [];
+  private pollOnce(jobId: string, mediaId: string, stackIdForAutoOpen?: string): void {
+    if (this.pending.has(jobId)) {
+      this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 1200);
+      return;
+    }
 
-          const first = results[0] as MediaItem | undefined;
-          if (first) {
-            if (optimisticMediaId && optimisticMediaId !== first.id) {
-              this.mediaService.remove(optimisticMediaId, false);
-            }
-            const existing = this.mediaService.getById(first.id);
-            if (existing) {
-              this.mediaService.patch(first.id, first);
-            } else {
-              this.mediaService.add(first);
-            }
-          } else if (optimisticMediaId) {
-            const processing = this.mediaService.getById(optimisticMediaId);
-            if (processing) {
-              const nextProgress = Math.min(95, Math.max(processing.progress ?? 0, (job?.progress ?? 0) || 15));
-              this.mediaService.patch(optimisticMediaId, { progress: nextProgress });
-            }
-          }
+    this.pending.add(jobId);
 
-          if (status === 'done' || status === 'failed' || status === 'cancelled') {
-            clearInterval(tick);
-            this.jobs.delete(jobId);
-            console.log('[GENERATE] polling finished', { jobId, status });
-            if (status === 'cancelled' && optimisticMediaId) {
-              this.mediaService.remove(optimisticMediaId, false);
-            } else {
-              this.mediaService.refresh();
-            }
-            if (status === 'done' && first) {
-              this.tryAutoOpenResult(first, stackIdForAutoOpen ?? first.id_stack);
-            }
-          }
-        },
-        error: (error) => {
-          clearInterval(tick);
-          this.jobs.delete(jobId);
-          console.error('[GENERATE] polling failed', { jobId, error });
+    this.generateApi.checkStatus(jobId).subscribe({
+      next: (job: GenerationStatusResponse) => {
+        this.pending.delete(jobId);
+
+        const status = job?.status;
+        const progress = Number(job?.progress ?? 0);
+
+        this.patchProcessingMedia(mediaId, {
+          progress: this.normalizeProgress(progress),
+          status: this.toMediaStatus(status),
+          jobId
+        });
+
+        if (status === 'done') {
+          this.handleDone(jobId, mediaId, job, stackIdForAutoOpen);
+          return;
         }
-      });
-    }, 1200);
 
-    this.jobs.set(jobId, tick);
+        if (status === 'failed' || status === 'cancelled') {
+          this.handleTerminalFailure(jobId, mediaId, status, job?.error);
+          return;
+        }
+
+        this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 1200);
+      },
+      error: (error) => {
+        this.pending.delete(jobId);
+        this.stopPolling(jobId);
+        console.error('[GENERATE] polling failed', { jobId, error });
+
+        this.patchProcessingMedia(mediaId, {
+          status: 'error'
+        });
+      }
+    });
   }
 
-  private extractMedia(res: any): MediaItem[] {
-    const jobList = Array.isArray(res?.jobs) ? res.jobs : Array.isArray(res?.jobs?.data) ? res.jobs.data : null;
-    if (jobList) {
-      return jobList.flatMap((job: any) => Array.isArray(job?.results?.data)
-        ? job.results.data
-        : Array.isArray(job?.results)
-          ? job.results
-          : []);
+  private handleDone(
+    jobId: string,
+    mediaId: string,
+    job: GenerationStatusResponse,
+    stackIdForAutoOpen?: string
+  ): void {
+    this.stopPolling(jobId);
+
+    const patch: Partial<MediaItem> = {
+      jobId,
+      status: 'success',
+      progress: 100,
+      type: job?.mediaType ?? this.mediaService.getById(mediaId)?.type ?? 'image'
+    };
+
+    if (job?.resultUrl) {
+      patch.url = job.resultUrl;
     }
 
-    const results = Array.isArray(res?.job?.results?.data)
-      ? res.job.results.data
-      : Array.isArray(res?.job?.results)
-        ? res.job.results
-        : [];
+    this.patchProcessingMedia(mediaId, patch);
 
-    return results ?? [];
+    const latest = this.mediaService.getById(mediaId);
+    if (latest) {
+      this.tryAutoOpenResult(latest, stackIdForAutoOpen ?? latest.id_stack);
+    }
+
+    this.mediaService.refresh();
+    console.log('[GENERATE] polling finished', { jobId, status: 'done' });
+  }
+
+  private handleTerminalFailure(
+    jobId: string,
+    mediaId: string,
+    status: 'failed' | 'cancelled',
+    error?: string | null
+  ): void {
+    this.stopPolling(jobId);
+
+    if (status === 'cancelled') {
+      this.mediaService.remove(mediaId, false);
+    } else {
+      this.patchProcessingMedia(mediaId, {
+        status: 'error'
+      });
+    }
+
+    console.error('[GENERATE] polling finished', { jobId, status, error });
+    this.mediaService.refresh();
+  }
+
+  private stopPolling(jobId: string): void {
+    const timer = this.jobs.get(jobId);
+    if (timer) {
+      clearTimeout(timer);
+      this.jobs.delete(jobId);
+    }
+    this.pending.delete(jobId);
+  }
+
+  private createOptimisticFromPayload(
+    jobId: string,
+    payload: GeneratePayload,
+    res: GenerationCreateResponse
+  ): MediaItem {
+    const mediaId = this.resolveMediaId(jobId, res?.mediaItemId);
+
+    return {
+      id: mediaId,
+      kind: 'media',
+      url: '',
+      type: 'image',
+      prompt: (payload as any)?.prompt ?? '',
+      ratio: (payload as any)?.ratio ?? '1:1',
+      resolution: (payload as any)?.resolution ?? '',
+      seed: (payload as any)?.seed,
+      createdAt: new Date(),
+      favorite: false,
+      status: 'processing',
+      progress: this.normalizeProgress(res?.progress ?? 0),
+      id_stack: mediaId,
+      order_in_stack: 1,
+      order_in_board: Date.now(),
+      jobId
+    };
+  }
+
+  private createOptimisticFromBase(
+    jobId: string,
+    base: MediaItem,
+    res: GenerationCreateResponse | { mediaItemId?: string },
+    type: MediaType,
+    options?: {
+      url?: string;
+      parentId?: string;
+      orderOffset?: number;
+    }
+  ): MediaItem {
+    const mediaId = this.resolveMediaId(jobId, res?.mediaItemId);
+    const offset = options?.orderOffset ?? 1;
+
+    return {
+      id: mediaId,
+      kind: 'media',
+      url: options?.url ?? '',
+      type,
+      prompt: base.prompt,
+      ratio: base.ratio,
+      resolution: base.resolution,
+      seed: base.seed,
+      createdAt: new Date(),
+      favorite: false,
+      status: 'processing',
+      progress: this.normalizeProgress((res as any)?.progress ?? 0),
+      id_stack: base.id_stack,
+      order_in_stack: (base.order_in_stack ?? 0) + offset,
+      order_in_board: base.order_in_board ?? Date.now(),
+      jobId,
+      parentId: options?.parentId
+    };
+  }
+
+  private resolveMediaId(jobId: string, mediaItemId?: string | null): string {
+    return (typeof mediaItemId === 'string' && mediaItemId.trim()) ? mediaItemId : `temp-${jobId}`;
+  }
+
+  private normalizeProgress(value: number): number {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(100, Math.round(value)));
+  }
+
+  private toMediaStatus(status?: PollingJobStatus): MediaItem['status'] {
+    if (status === 'done') return 'success';
+    if (status === 'failed') return 'error';
+    return 'processing';
+  }
+
+  private patchProcessingMedia(id: string, partial: Partial<MediaItem>): void {
+    const existing = this.mediaService.getById(id);
+    if (existing) {
+      this.mediaService.patch(id, partial);
+      return;
+    }
+
+    const fallback: MediaItem = {
+      id,
+      kind: 'media',
+      url: partial.url ?? '',
+      type: partial.type ?? 'image',
+      createdAt: new Date(),
+      favorite: false,
+      status: partial.status ?? 'processing',
+      progress: partial.progress ?? 0,
+      id_stack: id,
+      order_in_stack: 1,
+      order_in_board: Date.now(),
+      jobId: partial.jobId
+    };
+
+    this.mediaService.add(fallback);
   }
 
   private tryAutoOpenResult(real: MediaItem, targetStackId: string): void {

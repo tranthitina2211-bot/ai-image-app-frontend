@@ -5,12 +5,12 @@ export interface MediaItem {
   id: string;
   kind: 'media';
 
-  url?: string;
+  url: string;
   type: MediaType;
 
   prompt?: string;
   ratio?: string;
-  resolution?: string;   // ✅ NEW
+  resolution?: string;
   seed?: number;
 
   createdAt?: Date | string;

@@ -147,6 +147,7 @@ export class MediaService {
       .map((item): MediaItem => ({
         ...(item as MediaItem),
         kind: 'media' as const,
+        url: typeof item.url === 'string' ? item.url : '',
         createdAt: item.createdAt instanceof Date
           ? item.createdAt
           : new Date(item.createdAt ?? Date.now()),
