@@ -6,40 +6,14 @@ import { SettingsService } from '@services/settings.service';
 
 import { MediaItem, MediaType } from '@models/media.model';
 import { GeneratePayload } from 'src/app/core/generate/generate.types';
-import { GenerateApiService } from './generate-api.service';
+import {
+  GenerateApiService,
+  GenerationCreateResponse,
+  GenerationMultiCreateResponse,
+  GenerationStatusResponse,
+  PollingJobStatus
+} from './generate-api.service';
 
-type PollingJobStatus = 'queued' | 'generating' | 'done' | 'failed' | 'cancelled';
-
-interface GenerationCreateResponse {
-  jobId?: string;
-  status?: PollingJobStatus;
-  progress?: number;
-  mediaItemId?: string;
-}
-
-interface GenerationMultiCreateResponse {
-  jobs?: Array<{
-    jobId?: string;
-    status?: PollingJobStatus;
-    progress?: number;
-    mediaItemId?: string;
-  }>;
-}
-
-interface GenerationStatusResponse {
-  jobId: string;
-  status: PollingJobStatus;
-  progress: number;
-  error?: string | null;
-  providerJobId?: string | null;
-  startedAt?: string | null;
-  finishedAt?: string | null;
-  cancelledAt?: string | null;
-  mediaItemId?: string | null;
-  resultUrl?: string | null;
-  mediaStatus?: 'processing' | 'success' | 'error' | null;
-  mediaType?: MediaType | null;
-}
 
 @Injectable({ providedIn: 'root' })
 export class GenerateService {
