@@ -272,10 +272,13 @@ export class PromptBarComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onGenerate() {
+    const trimmedPrompt = (this.prompt ?? '').trim();
+    const inferredMode = this.fileAttach && !trimmedPrompt ? 'video' : (this.selected.mode === 'Image' ? 'image' : 'video');
+
     const payload: GeneratePayload = {
-      prompt: this.prompt,
+      prompt: trimmedPrompt,
       ratio: this.selected.ratio,
-      mode: this.selected.mode === 'Image' ? 'image' : 'video',
+      mode: inferredMode,
       resolution: this.selected.resolution,
       fileAttach: this.fileAttach,
       seed: this.presetSeed ?? undefined
@@ -286,7 +289,7 @@ export class PromptBarComponent implements OnInit, AfterViewInit, OnDestroy {
     if (autoSavePrompt) {
       this.promptBridge.setValue({
         source: 'manual',
-        prompt: this.prompt ?? '',
+        prompt: trimmedPrompt,
         type: payload.mode,
         ratio: payload.ratio,
         seed: payload.seed

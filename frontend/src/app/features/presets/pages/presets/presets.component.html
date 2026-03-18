@@ -1,0 +1,53 @@
+<div class="presets-page">
+  <div class="page-head">
+    <div class="head-left">
+      <div class="eyebrow">Preset gallery</div>
+      <h1 class="title">Presets</h1>
+    </div>
+
+    <div class="head-right">
+      <div class="subtitle">
+        Browse finished looks, open preview, copy prompt, or use directly in Create.
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-scroll">
+      <div class="tabs">
+        <button
+          *ngFor="let tab of tabs"
+          class="tab"
+          type="button"
+          [class.active]="activeTab === tab.key"
+          (click)="setTab(tab.key)">
+          {{ tab.label }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-section" *ngIf="cards.length; else emptyState">
+    <div class="preset-masonry">
+      <app-preset-card
+        *ngFor="let vm of cards; let i = index; trackBy: trackByPreset"
+        class="masonry-item"
+        [preset]="vm.preset"
+        [previewItem]="vm.cover"
+        [previewCount]="vm.previewCount"
+        [hasVideo]="vm.hasVideo"
+        [cardIndex]="i"
+        (open)="openPreset(vm)"
+        (copyPrompt)="copyPrompt(vm.preset)"
+        (usePreset)="usePreset(vm.preset)">
+      </app-preset-card>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <div class="empty-title">No presets found</div>
+      <div class="empty-desc">This category does not have any preset yet.</div>
+    </div>
+  </ng-template>
+</div>

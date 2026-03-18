@@ -1,0 +1,8 @@
+:host { display:block; min-height:100%; }
+.not-found-page { min-height: calc(100vh - 64px); display:grid; place-items:center; padding:32px; background: radial-gradient(circle at top, rgba(110,231,255,.14), transparent 30%), var(--app-bg); }
+.content { max-width:720px; text-align:center; padding:40px; border:1px solid var(--app-border); background:var(--app-surface); box-shadow:var(--app-shadow); border-radius:30px; }
+.eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.16em; color:var(--app-accent-2); font-weight:700; }
+h1 { font-size: clamp(2rem, 4vw, 3.4rem); line-height:1.05; margin:10px 0; }
+p { color:var(--app-text-soft); }
+.actions { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:18px; }
+a { padding:12px 16px; border-radius:14px; border:1px solid var(--app-border); text-decoration:none; color:var(--app-text); }

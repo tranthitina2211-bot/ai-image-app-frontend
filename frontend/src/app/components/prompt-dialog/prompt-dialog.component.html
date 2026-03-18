@@ -1,0 +1,32 @@
+<div class="dialog-shell dialog-prompt">
+  <div class="dialog-head">
+    <div class="dialog-title">{{ data.title }}</div>
+  </div>
+
+  <div class="dialog-body">
+    <label class="field-label">
+      {{ data.placeholder || 'Enter value' }}
+    </label>
+
+    <input
+      class="text-input"
+      type="text"
+      [placeholder]="data.placeholder || 'Enter text...'"
+      [formControl]="control"
+      (keydown.enter)="submit()"
+      autofocus />
+
+    <div class="field-error" *ngIf="control.touched && control.invalid">
+      Please enter a value.
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button type="button" class="btn btn-ghost" (click)="close()">
+      {{ data.cancelText || 'Cancel' }}
+    </button>
+    <button type="button" class="btn btn-primary" (click)="submit()">
+      {{ data.confirmText || 'Confirm' }}
+    </button>
+  </div>
+</div>

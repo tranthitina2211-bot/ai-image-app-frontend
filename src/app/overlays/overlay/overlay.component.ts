@@ -356,9 +356,13 @@ export class OverlayComponent implements OnInit, OnDestroy {
         });
 
         createRef.afterClosed().subscribe((name?: string) => {
-          if (!name) return;
-          const created = this.collectionService.create(name);
-          this.collectionService.addItems(created.id, [itemId]);
+          const trimmed = name?.trim();
+          if (!trimmed) return;
+
+          this.collectionService.create(trimmed).subscribe(created => {
+            if (!created?.id) return;
+            this.collectionService.addItems(created.id, [itemId]);
+          });
         });
       }
     });

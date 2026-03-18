@@ -39,8 +39,9 @@ export class CollectionsComponent {
 
     ref.afterClosed().subscribe((name?: string) => {
       if (!name) return;
-      const created = this.collectionService.create(name);
-      this.router.navigate(['/app/favorites/collections', created.id]);
+      this.collectionService.create(name).subscribe(created => {
+        this.router.navigate(['/app/favorites/collections', created.id]);
+      });
     });
   }
 

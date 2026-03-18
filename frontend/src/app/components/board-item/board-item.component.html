@@ -1,0 +1,136 @@
+<div class="board-card"
+     [attr.data-stack-id]="items.at(0)?.id_stack"
+     [class.hover-target]="isHoverTarget"
+     [class.merging-out]="isMergingOut"
+     [class.merging-in]="isMergingIn"
+     cdkDrag
+     [cdkDragData]="items"
+     [cdkDragStartDelay]="{ touch: 300, mouse: 0 }"
+     (cdkDragMoved)="onDragMoved($event)"
+     (cdkDragEnded)="onDragEndedMerge()"
+     (click)="onClick($event)"
+     #card>
+
+  <ng-container *ngIf="items.length === 1; else stackView">
+
+    <div class="media-card">
+
+      <div *ngIf="items[0].status === 'processing'" class="loading-card">
+        <button
+          class="cancel-btn"
+          type="button"
+          (click)="onCancel($event, items[0])">
+          ✕
+        </button>
+        <div class="progress-wrapper">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="items[0].progress || 0">
+            </div>
+          </div>
+          <div class="progress-text">
+            {{ items[0].progress || 0 }}%
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="items[0].status === 'success'">
+
+        <ng-container [ngSwitch]="items[0].type">
+
+          <img
+            *ngSwitchCase="'image'"
+            [src]="items[0].url"
+            alt=""
+          />
+
+          <ng-container *ngSwitchCase="'video'">
+            <video
+              [src]="items[0].url"
+              #videoEl
+              [attr.autoplay]="autoplayEnabled ? '' : null"
+              [loop]="autoplayEnabled"
+              playsinline
+              preload="metadata"
+              [muted]="true"
+              [attr.muted]="true"
+              (loadedmetadata)="forceMute($event)">
+            </video>
+
+            <div class="video-badge">▶</div>
+          </ng-container>
+
+        </ng-container>
+
+      </ng-container>
+
+    </div>
+
+  </ng-container>
+
+  <ng-template #stackView>
+
+    <div class="stack-folder">
+
+      <div class="stack-grid">
+
+        <ng-container *ngFor="let item of items.slice(0,4); let i = index">
+
+          <div class="stack-thumb"
+               [class.processing]="item.status === 'processing'"
+               [class.ghost]="!!item.ghostOf">
+
+            <ng-container *ngIf="item.status === 'processing'; else stackThumbDone">
+              <div class="stack-thumb-loading">
+                <div class="stack-thumb-bar">
+                  <div class="stack-thumb-fill" [style.width.%]="item.progress || 0"></div>
+                </div>
+                <div class="stack-thumb-text">{{ item.progress || 0 }}%</div>
+
+                <button
+                  class="stack-thumb-cancel"
+                  type="button"
+                  (click)="onCancel($event, items[0])">
+                  ✕
+                </button>
+              </div>
+            </ng-container>
+
+            <ng-template #stackThumbDone>
+              <ng-container [ngSwitch]="item.type">
+                <img *ngSwitchCase="'image'" [src]="item.url" alt="" />
+                <video
+                  *ngSwitchCase="'video'"
+                  #videoEl
+                  [attr.autoplay]="autoplayEnabled ? '' : null"
+                  [loop]="autoplayEnabled"
+                  playsinline
+                  preload="metadata"
+                  [muted]="true"
+                  [attr.muted]="true"
+                  (loadedmetadata)="forceMute($event)"
+                  [src]="item.url">
+                </video>
+              </ng-container>
+            </ng-template>
+
+            <div *ngIf="i === 3 && items.length > 4" class="stack-more-overlay">
+              +{{ items.length - 4 }}
+            </div>
+
+          </div>
+
+        </ng-container>
+
+      </div>
+
+      <div class="stack-count">
+        {{ items.length }}
+      </div>
+
+    </div>
+
+  </ng-template>
+
+</div>

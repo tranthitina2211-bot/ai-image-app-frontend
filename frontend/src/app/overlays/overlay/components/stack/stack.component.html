@@ -1,0 +1,224 @@
+<div class="stack-container" *ngIf="items && items.length > 0">
+  <div class="stack-layout">
+
+    <div class="thumbs"
+         *ngIf="items.length > 1"
+         [class.vertical]="!isMobile"
+         [class.horizontal]="isMobile">
+
+      <cdk-virtual-scroll-viewport
+        *ngIf="isMobile"
+        #thumbViewportMobile
+        class="thumb-viewport"
+        [itemSize]="thumbItemSize"
+        orientation="horizontal"
+        style="height:80px">
+
+        <div *cdkVirtualFor="let item of items; let i = index; trackBy: trackByFn">
+          <div class="thumb"
+               [class.active]="i === currentIndex"
+               [class.processing]="item.status === 'processing'"
+               [class.ghost]="!!item.ghostOf"
+               (click)="select(i)">
+
+            <ng-container *ngIf="item.status === 'processing'; else thumbDone">
+              <div class="thumb-loading">
+                <div class="thumb-ring"></div>
+                <div class="thumb-percent">{{ item.progress || 0 }}%</div>
+              </div>
+            </ng-container>
+
+            <ng-template #thumbDone>
+              <img *ngIf="item.type === 'image'" [src]="item.url" />
+              <video
+                *ngIf="item.type === 'video'"
+                #videoPlayer
+                [src]="item.url"
+                [attr.autoplay]="autoplayEnabled ? '' : null"
+                [loop]="autoplayEnabled"
+                muted
+                playsinline>
+              </video>
+            </ng-template>
+
+          </div>
+        </div>
+      </cdk-virtual-scroll-viewport>
+
+      <cdk-virtual-scroll-viewport
+        *ngIf="!isMobile"
+        #thumbViewportDesktop
+        class="thumb-viewport"
+        [itemSize]="thumbItemSize"
+        orientation="vertical">
+
+        <div *cdkVirtualFor="let item of items; let i = index; trackBy: trackByFn">
+          <div class="thumb"
+               [class.active]="i === currentIndex"
+               [class.processing]="item.status === 'processing'"
+               [class.ghost]="!!item.ghostOf"
+               (click)="select(i)">
+
+            <ng-container *ngIf="item.status === 'processing'; else thumbDoneDesktop">
+              <div class="thumb-loading">
+                <div class="thumb-ring"></div>
+                <div class="thumb-percent">{{ item.progress || 0 }}%</div>
+              </div>
+            </ng-container>
+
+            <ng-template #thumbDoneDesktop>
+              <img *ngIf="item.type === 'image'" [src]="item.url" />
+              <video
+                *ngIf="item.type === 'video'"
+                #videoPlayer
+                [src]="item.url"
+                [attr.autoplay]="autoplayEnabled ? '' : null"
+                [loop]="autoplayEnabled"
+                muted
+                playsinline>
+              </video>
+            </ng-template>
+
+          </div>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </div>
+
+    <div class="media-area">
+
+      <button class="nav prev"
+              *ngIf="currentIndex > 0"
+              (click)="prev()">‹</button>
+
+      <div class="media-wrapper"
+           (touchstart)="onTouchStart($event)"
+           (touchmove)="onTouchMove($event)"
+           (touchend)="onTouchEnd()"
+           [style.transform]="transformStyle"
+           [style.transition]="transitionStyle">
+
+           <ng-container *ngIf="current?.status === 'processing'; else mediaDone">
+
+             <div class="main-media ghost-main">
+
+               <div class="ghost-progress">
+
+                 <button
+                   class="ghost-cancel-btn"
+                   type="button"
+                   (click)="onCancel($event, current!)"
+                   aria-label="Cancel">
+                   <mat-icon>close</mat-icon>
+                 </button>
+
+                 <div class="ghost-ring-wrap">
+                   <div class="ghost-ring"></div>
+                   <div class="ghost-ring-core"></div>
+                   <div class="ghost-percent">{{ current?.progress || 0 }}%</div>
+                 </div>
+
+                 <div class="ghost-status-text">Rendering…</div>
+
+               </div>
+
+             </div>
+
+           </ng-container>
+        <ng-template #mediaDone>
+
+          <img *ngIf="current?.type === 'image'"
+               [src]="current?.url"
+               class="main-media"
+               loading="lazy" />
+
+          <video *ngIf="current?.type === 'video'"
+                 #mainVideo
+                 [src]="current?.url"
+                 class="main-media"
+                 [attr.autoplay]="autoplayEnabled ? '' : null"
+                 [loop]="autoplayEnabled"
+                 muted
+                 playsinline
+                 preload="metadata">
+          </video>
+
+        </ng-template>
+
+        <div class="top-bar" *ngIf="current?.status !== 'processing'">
+          <button
+            *ngIf="overlayContext !== 'presets'"
+            class="favorite-btn"
+            [class.active]="isFavorite"
+            (click)="toggleFavorite($event)">
+            <span class="heart">❤</span>
+          </button>
+
+          <app-action-bar
+            [actions]="actions"
+            [item]="current!"
+            [openRight]="isMobile"
+            [stackSize]="items.length"
+            (actionClick)="onActionFromBar($event)">
+          </app-action-bar>
+        </div>
+
+        <div class="video-controls"
+             *ngIf="current?.type === 'video' && current?.status !== 'processing'">
+
+          <button
+            class="control-btn control-btn--primary"
+            type="button"
+            (click)="togglePlay()"
+            [attr.aria-label]="isPlaying ? 'Pause video' : 'Play video'">
+            <mat-icon>{{ isPlaying ? 'pause' : 'play_arrow' }}</mat-icon>
+          </button>
+
+          <div class="volume-wrapper"
+               [class.open]="showVolume"
+               (mouseenter)="showVolume = true"
+               (mouseleave)="showVolume = false">
+
+            <button
+              class="control-btn"
+              type="button"
+              (click)="toggleMute()"
+              [attr.aria-label]="volume === 0 ? 'Unmute' : 'Mute'">
+              <mat-icon>
+                {{
+                  volume === 0
+                    ? 'volume_off'
+                    : volume < 0.5
+                      ? 'volume_down'
+                      : 'volume_up'
+                }}
+              </mat-icon>
+            </button>
+
+            <div class="volume-panel">
+              <mat-icon class="volume-panel-icon">volume_up</mat-icon>
+
+              <input
+                class="volume-slider"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                [(ngModel)]="volume"
+                (input)="changeVolume()">
+
+              <span class="volume-value">{{ (volume * 100) | number:'1.0-0' }}</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <button class="nav next"
+              *ngIf="currentIndex < items.length - 1"
+              (click)="next()">›</button>
+
+    </div>
+
+  </div>
+</div>

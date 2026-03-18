@@ -1,0 +1,46 @@
+<div class="collections-header">
+  <div class="title">Collections</div>
+  <button class="btn primary" type="button" (click)="create()">+ New</button>
+</div>
+
+<ng-container *ngIf="collections$ | async as collections">
+  <ng-container *ngIf="media$ | async as media">
+    <div class="collection-list" *ngIf="collections.length; else emptyState">
+      <button
+        class="collection-card"
+        type="button"
+        *ngFor="let c of collections; trackBy: trackById"
+        (click)="open(c.id)">
+
+        <div class="cover">
+          <ng-container *ngIf="getCover(c, media) as cover; else placeholder">
+            <img *ngIf="cover.type === 'image'" [src]="cover.url" alt="" />
+            <video *ngIf="cover.type === 'video'" [src]="cover.url" muted playsinline></video>
+          </ng-container>
+
+          <ng-template #placeholder>
+            <div class="placeholder">📁</div>
+          </ng-template>
+        </div>
+
+        <div class="meta">
+          <div class="name" [title]="c.name">{{ c.name }}</div>
+          <div class="sub">{{ c.itemIds.length }} items</div>
+        </div>
+
+        <div class="actions" (click)="$event.stopPropagation()">
+          <button class="icon" type="button" (click)="rename(c.id, c.name)">✏️</button>
+          <button class="icon danger" type="button" (click)="remove(c.id)">🗑️</button>
+        </div>
+      </button>
+    </div>
+  </ng-container>
+</ng-container>
+
+<ng-template #emptyState>
+  <div class="empty">
+    <div class="empty-title">No collections yet</div>
+    <div class="empty-sub">Create your first album to organize favorites by topic.</div>
+    <button class="btn primary" type="button" (click)="create()">Create collection</button>
+  </div>
+</ng-template>

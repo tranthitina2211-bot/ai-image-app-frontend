@@ -22,6 +22,7 @@ import { MediaItem } from '@models/media.model';
 import { OverlayService } from '@services/overlay.service';
 import { PromptBridgeService } from '@services/promptbridge.service';
 import { SettingsService } from '@services/settings.service';
+import { MediaService } from '@services/media.service';
 
 @Component({
   selector: 'app-stack',
@@ -57,6 +58,7 @@ export class StackComponent implements OnInit, AfterViewInit, OnChanges, OnDestr
     private promptBridge: PromptBridgeService,
     private overlayService: OverlayService,
     private settingsService: SettingsService,
+    private mediaService: MediaService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -194,11 +196,17 @@ export class StackComponent implements OnInit, AfterViewInit, OnChanges, OnDestr
     });
   }
 
-  isFavorite = false;
+  get isFavorite(): boolean {
+    return !!this.current?.favorite;
+  }
 
   toggleFavorite(event: MouseEvent) {
     event.stopPropagation();
-    this.isFavorite = !this.isFavorite;
+
+    const item = this.current;
+    if (!item?.id) return;
+
+    this.mediaService.toggleFavorite(item.id);
   }
 
   isPlaying = true;

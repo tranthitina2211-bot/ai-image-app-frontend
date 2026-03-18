@@ -1,0 +1,92 @@
+<div class="sheet-backdrop" (click)="close()"></div>
+
+<section class="detail-sheet" *ngIf="item" (click)="$event.stopPropagation()">
+  <!-- <div class="sheet-handle"></div> -->
+
+  <div class="sheet-head">
+    <div class="sheet-title-wrap">
+      <div class="sheet-title">Item details</div>
+      <div class="sheet-subtitle">
+        {{ item.type | titlecase }} · {{ item.status | titlecase }}
+      </div>
+    </div>
+
+    <button class="sheet-close" type="button" (click)="close()" aria-label="Close detail sheet">
+      ✕
+    </button>
+  </div>
+
+  <div class="sheet-body">
+    <div class="preview-card">
+      <ng-container *ngIf="item.status === 'processing'; else previewDone">
+        <div class="preview-loading">
+          <div class="preview-ring"></div>
+          <div class="preview-progress">{{ item.progress ?? 0 }}%</div>
+        </div>
+      </ng-container>
+
+      <ng-template #previewDone>
+        <img *ngIf="item.type === 'image'" [src]="item.url" alt="" />
+        <video *ngIf="item.type === 'video'" [src]="item.url" muted playsinline controls></video>
+      </ng-template>
+    </div>
+
+    <div class="chips">
+      <span class="chip">{{ item.type | titlecase }}</span>
+      <span class="chip" [class.processing]="isProcessing">{{ item.status | titlecase }}</span>
+      <span class="chip" *ngIf="item.ghostOf">Ghost</span>
+    </div>
+
+    <div class="detail-block">
+      <div class="detail-label">Prompt</div>
+      <div class="prompt-box">{{ promptText }}</div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-row">
+        <div class="k">Ratio</div>
+        <div class="v">{{ ratioText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Resolution</div>
+        <div class="v">{{ resolutionText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Seed</div>
+        <div class="v">{{ seedText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Progress</div>
+        <div class="v">{{ progressText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Created</div>
+        <div class="v">{{ createdText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Stack ID</div>
+        <div class="v mono">{{ stackText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Parent ID</div>
+        <div class="v mono">{{ parentText }}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="k">Job ID</div>
+        <div class="v mono">{{ jobText }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" type="button" (click)="close()">Close</button>
+    <button class="btn btn-primary" type="button" (click)="onCopyPrompt()">Copy prompt</button>
+  </div>
+</section>

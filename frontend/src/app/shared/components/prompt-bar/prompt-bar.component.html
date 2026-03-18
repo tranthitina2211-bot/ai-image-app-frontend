@@ -1,0 +1,145 @@
+<div class="prompt-container">
+
+  <div class="preview-wrapper" *ngIf="previewUrl">
+    <div class="preview-card">
+      <img [src]="previewUrl" />
+      <button class="remove-btn" (click)="removeImage()" type="button">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <div class="prompt-box">
+
+    <div class="left-tools">
+      <button class="icon-btn" (click)="fileInput.click()">
+        +
+      </button>
+
+      <button class="icon-btn" (click)="toggleOptions($event)">
+        {{ selected.mode === 'Video' ? '▶' : '🖼' }}
+      </button>
+
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <div class="input-wrapper">
+
+      <div class="thumb-stack" *ngIf="promptThumbs.length">
+
+        <ng-container *ngFor="let t of promptThumbs; let i = index">
+          <div
+            class="thumb-item"
+            [class.more]="t.kind === 'more'"
+            [class.done]="t.kind === 'done'"
+            [style.zIndex]="300 - i"
+            [style.--x.px]="i * 14"
+            (click)="onPromptThumbClick(t)"
+          >
+
+            <ng-container *ngIf="t.kind === 'processing'">
+              <div class="mini-progress">
+                <div class="mini-ring"></div>
+                <div class="mini-percent">{{ t.progress }}%</div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="t.kind === 'done'">
+              <ng-container [ngSwitch]="t.type">
+                <img *ngSwitchCase="'image'" [src]="t.url" />
+                <div *ngSwitchCase="'video'" class="mini-video">
+                  <span class="mini-play">▶</span>
+                </div>
+              </ng-container>
+              <div class="mini-done-badge">✓</div>
+            </ng-container>
+
+            <div class="more-overlay" *ngIf="t.kind === 'more'">
+              +{{ t.moreCount }}
+            </div>
+
+          </div>
+        </ng-container>
+
+      </div>
+
+      <textarea
+        [(ngModel)]="prompt"
+        #promptInput
+        rows="1"
+        class="prompt-input"
+        placeholder="Type to create..."
+        (input)="autoResize($event)"
+        (keydown.enter)="onGenerate()"
+      ></textarea>
+
+    </div>
+
+    <button class="generate-btn"
+      [disabled]="!canGenerate"
+      (click)="onGenerate()">
+      ⚡
+    </button>
+
+  </div>
+
+  <div
+    class="option-panel"
+    *ngIf="showOptions"
+    #optionsPanel
+  >
+
+    <div class="option-group">
+      <div class="group-title">Mode</div>
+      <div class="row">
+        <button
+          class="option-item"
+          [class.active]="selected.mode === 'Video'"
+          (click)="selectMode('Video')">
+          ▶ Video
+        </button>
+
+        <button
+          class="option-item"
+          [class.active]="selected.mode === 'Image'"
+          (click)="selectMode('Image')">
+          🖼 Image
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="group-title">Resolution</div>
+      <div class="row">
+        <button
+          class="option-item"
+          *ngFor="let s of resolutions"
+          [class.active]="selected.resolution === s"
+          (click)="selectResolution(s)">
+          {{ s }}
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="group-title">Aspect Ratio</div>
+      <div class="row">
+        <button
+          class="option-item"
+          *ngFor="let r of ratio"
+          [class.active]="selected.ratio === r.key"
+          (click)="selectRatio(r.key)">
+          {{ r.label }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -5,6 +5,7 @@ import { AuthService } from '../../auth.service';
 import { MediaService } from '@services/media.service';
 import { SettingsService } from '@services/settings.service';
 import { CollectionService } from '@services/collection.service';
+import { LoadingOverlayService } from '@services/loading-overlay.service';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,8 @@ export class LoginComponent implements OnInit {
     private readonly settingsService: SettingsService,
     private readonly collectionService: CollectionService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly loadingOverlay: LoadingOverlayService
   ) {}
 
   ngOnInit(): void {
@@ -39,11 +41,9 @@ export class LoginComponent implements OnInit {
 
       if (socialError) {
         this.error = decodeURIComponent(socialError);
-        console.error('[AUTH] social login failed', this.error);
       }
 
       if (token && email) {
-        console.log('[AUTH] social login success', { email, plan });
         this.authState.login({
           token,
           user: {
@@ -53,11 +53,12 @@ export class LoginComponent implements OnInit {
           }
         });
 
+        this.loadingOverlay.show('Signing you in...', 'Preparing your workspace');
         this.settingsService.fetchRemote();
         this.mediaService.refresh();
         this.collectionService.refresh();
         const redirect = params.get('redirect') || '/app/create';
-        this.router.navigateByUrl(redirect);
+        this.router.navigateByUrl(redirect).finally(() => this.loadingOverlay.hide());
       }
     });
   }
@@ -66,7 +67,7 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.error = '';
     this.fieldErrors = {};
-    console.log('[AUTH] login submit', { email: this.email });
+    this.loadingOverlay.show('Signing you in...', 'Syncing settings, media, and collections');
 
     this.authService.login({ email: this.email, password: this.password, device_name: 'angular-web' }).subscribe({
       next: (res) => {
@@ -75,8 +76,8 @@ export class LoginComponent implements OnInit {
         if (!res?.success || !data?.token || !data?.user) {
           this.error = res?.message || 'Login failed';
           this.fieldErrors = this.normalizeErrors(res?.errors);
-          console.error('[AUTH] login rejected', res);
           this.loading = false;
+          this.loadingOverlay.hide();
           return;
         }
 
@@ -95,14 +96,13 @@ export class LoginComponent implements OnInit {
         this.collectionService.refresh();
 
         const redirect = this.route.snapshot.queryParamMap.get('redirect') || '/app/create';
-        console.log('[AUTH] login success', { redirect });
-        this.router.navigateByUrl(redirect);
+        this.router.navigateByUrl(redirect).finally(() => this.loadingOverlay.hide());
       },
       error: (err) => {
         this.error = err?.error?.message || 'Login failed';
         this.fieldErrors = this.normalizeErrors(err?.error?.errors);
-        console.error('[AUTH] login failed', err);
         this.loading = false;
+        this.loadingOverlay.hide();
       },
       complete: () => {
         this.loading = false;
@@ -112,7 +112,6 @@ export class LoginComponent implements OnInit {
 
   socialLogin(provider: 'google' | 'github' | 'facebook'): void {
     const url = this.authService.getSocialLoginUrl(provider);
-    console.log('[AUTH] social login redirect', { provider, url });
     window.location.href = url;
   }
 

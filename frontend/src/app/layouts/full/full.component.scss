@@ -1,0 +1,95 @@
+:host { display:block; }
+
+.main-container {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(89, 225, 255, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.08), transparent 28%),
+    var(--app-bg);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(90deg, rgba(8, 15, 27, 0.96), rgba(12, 22, 36, 0.92)) !important;
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--app-border);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.18);
+}
+
+body.theme-light .topbar {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.96)) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+body.theme-light .main-container {
+  background:
+    radial-gradient(circle at top left, rgba(6, 182, 212, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.08), transparent 28%),
+    var(--app-bg);
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #06131a;
+  font-size: 18px;
+  background: linear-gradient(135deg, var(--app-accent), var(--app-accent-2));
+  box-shadow: 0 10px 22px rgba(6, 182, 212, 0.25);
+}
+
+.brand-copy {
+  display: grid;
+  line-height: 1;
+}
+
+.brand-copy strong {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--app-heading);
+}
+
+.brand-copy small {
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--app-text-soft);
+}
+
+.shell-toggle {
+  margin-left: 12px;
+  color: var(--app-heading) !important;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+}
+
+.shell-toggle .mat-icon {
+  color: var(--app-heading) !important;
+}
+
+.example-sidenav-container.no-topbar {
+  height: 100vh;
+}
+
+.page-wrapper.is-auth {
+  min-height: 100vh;
+}
+
+@media (max-width: 767px) {
+  .app-brand { gap: 10px; }
+  .brand-copy { display: none; }
+  .brand-mark { width: 34px; height: 34px; border-radius: 12px; font-size: 16px; }
+  .shell-toggle { margin-left: 8px; }
+}

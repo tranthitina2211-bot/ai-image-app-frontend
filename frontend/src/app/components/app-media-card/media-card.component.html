@@ -1,0 +1,44 @@
+<div class="media-card"
+     (click)="onCardClick($event)"
+     [class.selectable]="selectable"
+     [class.selected]="selected">
+
+  <div class="select-overlay" *ngIf="selectable">
+    <div class="check" [class.on]="selected">
+      <span class="material-icons">check</span>
+    </div>
+  </div>
+
+  <div *ngIf="item.status === 'processing'" class="loading-card">
+    <button class="cancel-btn" type="button"(click)="onCancel(item)">✕</button>
+
+    <div class="progress-wrapper">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="item.progress || 0"></div>
+      </div>
+      <div class="progress-text">{{ item.progress || 0 }}%</div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="item.status === 'success'">
+    <ng-container [ngSwitch]="item.type">
+      <img *ngSwitchCase="'image'" [src]="item.url" alt="" />
+
+      <ng-container *ngSwitchCase="'video'">
+        <video
+          [src]="item.url"
+          #videoEl
+          [attr.autoplay]="autoplayEnabled ? '' : null"
+          [loop]="autoplayEnabled"
+          playsinline
+          preload="metadata"
+          [muted]="true"
+          [attr.muted]="true"
+          (loadedmetadata)="forceMute($event)">
+        </video>
+        <div class="video-badge">▶</div>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+
+</div>

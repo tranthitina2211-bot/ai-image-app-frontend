@@ -1,0 +1,14 @@
+<div class="folder">
+  <div class="cover">
+    <img *ngIf="cover?.type==='image'" [src]="cover.url" alt="" />
+    <video *ngIf="cover?.type==='video'" [src]="cover.url" autoplay muted loop playsinline (loadedmetadata)="forceMute($event)"></video>
+
+    <div class="badge">📁 {{ count }}</div>
+    <div class="fade"></div>
+  </div>
+
+  <div class="meta">
+    <div class="day">{{ dayKey }}</div>
+    <div class="sub">History</div>
+  </div>
+</div>

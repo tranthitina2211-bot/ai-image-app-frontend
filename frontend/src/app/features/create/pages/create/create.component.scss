@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  height: auto;
+  min-height: 100%;
+}
+
+.create-page {
+  padding: 24px 32px 140px;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--app-text);
+}
+
+.create-end-space {
+  height: 24px;
+}
+
+@media (max-width: 1024px) {
+  .create-page {
+    padding: 0 0 140px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .create-page {
+    padding: 0 0 160px;
+    width: 100%;
+  }
+}

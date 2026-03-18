@@ -42,8 +42,13 @@
 
           <div class="field-row">
             <label class="field-label">Gender</label>
-            <select class="app-select" [value]="vm.settings.profile.gender" (change)="updateGender($any($event.target).value)">
-              <option *ngFor="let option of genderOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            <select class="app-select" (change)="updateGender($any($event.target).value)">
+              <option
+                *ngFor="let option of genderOptions; trackBy: trackByValue"
+                [value]="option.value"
+                [attr.selected]="option.value === vm.settings.profile.gender ? '' : null">
+                {{ option.label }}
+              </option>
             </select>
           </div>
 
@@ -97,8 +102,13 @@
           </div>
 
           <div class="setting-control">
-            <select class="app-select" [value]="vm.settings.defaultRatio" (change)="updateDefaultRatio($any($event.target).value)">
-              <option *ngFor="let option of ratioOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            <select class="app-select" (change)="updateDefaultRatio($any($event.target).value)">
+              <option
+                *ngFor="let option of ratioOptions; trackBy: trackByValue"
+                [value]="option.value"
+                [attr.selected]="option.value === vm.settings.defaultRatio ? '' : null">
+                {{ option.label }}
+              </option>
             </select>
           </div>
         </div>
@@ -145,8 +155,13 @@
           </div>
 
           <div class="setting-control">
-            <select class="app-select" [value]="vm.settings.theme" (change)="updateTheme($any($event.target).value)">
-              <option *ngFor="let option of themeOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            <select class="app-select" (change)="updateTheme($any($event.target).value)">
+              <option
+                *ngFor="let option of themeOptions; trackBy: trackByValue"
+                [value]="option.value"
+                [attr.selected]="option.value === vm.settings.theme ? '' : null">
+                {{ option.label }}
+              </option>
             </select>
           </div>
         </div>
@@ -158,8 +173,13 @@
           </div>
 
           <div class="setting-control">
-            <select class="app-select" [value]="vm.settings.gridSize" (change)="updateGridSize($any($event.target).value)">
-              <option *ngFor="let option of gridSizeOptions; trackBy: trackByValue" [value]="option.value">{{ option.label }}</option>
+            <select class="app-select" (change)="updateGridSize($any($event.target).value)">
+              <option
+                *ngFor="let option of gridSizeOptions; trackBy: trackByValue"
+                [value]="option.value"
+                [attr.selected]="option.value === vm.settings.gridSize ? '' : null">
+                {{ option.label }}
+              </option>
             </select>
           </div>
         </div>

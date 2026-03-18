@@ -9,6 +9,10 @@ import {
 } from '@models/app-settings.model';
 import { SettingsService } from '@services/settings.service';
 import { PromptBridgeService } from '@services/promptbridge.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-settings',
@@ -56,7 +60,8 @@ export class SettingsComponent {
 
   constructor(
     private settingsService: SettingsService,
-    private promptBridge: PromptBridgeService
+    private promptBridge: PromptBridgeService,
+    private dialog: MatDialog
   ) {}
 
   updateTheme(value: string): void {
@@ -112,10 +117,20 @@ export class SettingsComponent {
   }
 
   resetSettings(): void {
-    const confirmed = window.confirm('Reset all settings to default values?');
-    if (!confirmed) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Reset settings',
+        message: 'Reset all settings to their default values?',
+        confirmText: 'Reset',
+        cancelText: 'Cancel'
+      }
+    });
 
-    this.settingsService.reset();
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) return;
+      this.settingsService.reset();
+    });
   }
 
   trackByValue(_: number, item: { value: string; label: string }): string {

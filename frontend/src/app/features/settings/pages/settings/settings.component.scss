@@ -1,0 +1,367 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.settings-page {
+  min-height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  background: var(--app-bg, #0f1115);
+  color: var(--app-text, #f5f7fb);
+}
+
+.settings-shell {
+  width: min(100%, 980px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-header {
+  padding: 4px 4px 10px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--app-text-soft);
+  margin-bottom: 10px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--app-heading);
+}
+
+.page-subtitle {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--app-text-soft);
+  max-width: 620px;
+}
+
+.settings-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 22px;
+  box-shadow: var(--app-shadow);
+  overflow: hidden;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 22px 14px;
+}
+
+.section-kicker {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--app-text-soft);
+  margin-bottom: 8px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--app-heading);
+}
+
+.profile-block {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 20px;
+  padding: 0 22px 22px;
+}
+
+.avatar-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.avatar-img,
+.avatar-fallback {
+  width: 112px;
+  height: 112px;
+  border-radius: 24px;
+}
+
+.avatar-img {
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--app-border);
+}
+
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-surface-2);
+  color: var(--app-heading);
+  font-size: 38px;
+  font-weight: 700;
+  border: 1px solid var(--app-border);
+}
+
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-soft);
+}
+
+.app-input,
+.app-select {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  color: var(--app-input-text);
+  padding: 0 14px;
+  outline: none;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.app-input::placeholder {
+  color: var(--app-text-muted);
+}
+
+.app-input:focus,
+.app-select:focus {
+  border-color: rgba(110, 168, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(110, 168, 255, 0.14);
+}
+
+.app-select {
+  min-width: 140px;
+  cursor: pointer;
+}
+
+.app-select option {
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-row {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--app-border);
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: space-between;
+  padding: 18px 22px;
+  box-sizing: border-box;
+}
+
+.setting-row:first-child {
+  border-top: 0;
+}
+
+.setting-row.static {
+  cursor: default;
+}
+
+.setting-row.action {
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.setting-row.action:hover {
+  background: var(--app-hover);
+}
+
+.setting-row.action:active {
+  transform: scale(0.997);
+}
+
+.setting-meta {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-heading);
+}
+
+.hint {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--app-text-soft);
+}
+
+.setting-control {
+  flex: 0 0 auto;
+  width: 180px;
+}
+
+.value-pill {
+  flex: 0 0 auto;
+  min-width: 72px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-surface-2);
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.action-arrow {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 90, 90, 0.10);
+  color: #ff8f8f;
+  font-size: 18px;
+}
+
+.setting-row.danger .label {
+  color: #ff8f8f;
+}
+
+.setting-row.danger .hint {
+  color: rgba(255, 143, 143, 0.8);
+}
+
+.switch {
+  position: relative;
+  width: 54px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: inline-block;
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--app-surface-3);
+  border: 1px solid var(--app-border);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.switch input:checked + .slider {
+  background: linear-gradient(135deg, #5f8cff 0%, #7b61ff 100%);
+  border-color: rgba(123, 97, 255, 0.35);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+.switch input:focus + .slider {
+  box-shadow: 0 0 0 3px rgba(110, 168, 255, 0.14);
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 14px;
+  }
+
+  .settings-shell {
+    gap: 14px;
+  }
+
+  .section-head {
+    padding: 18px 16px 10px;
+  }
+
+  .profile-block {
+    grid-template-columns: 1fr;
+    padding: 0 16px 16px;
+  }
+
+  .avatar-box {
+    justify-content: flex-start;
+  }
+
+  .setting-row {
+    padding: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .setting-control,
+  .switch,
+  .value-pill,
+  .action-arrow {
+    align-self: flex-end;
+  }
+
+  .setting-control {
+    width: 100%;
+  }
+}
+
+.end-space {
+  height: 120px;
+  flex: 0 0 auto;
+}

@@ -1,0 +1,26 @@
+<div class="account-page">
+  <section class="hero-card">
+    <img [src]="authState.currentUser.avatar" alt="avatar" />
+    <div>
+      <div class="eyebrow">Account</div>
+      <h1>{{ authState.currentUser.name }}</h1>
+      <p>{{ authState.currentUser.email }} · {{ authState.currentUser.plan }} plan</p>
+    </div>
+  </section>
+
+  <section class="account-grid">
+    <div class="panel">
+      <h3>Profile details</h3>
+      <div class="field"><span>Display name</span><strong>{{ authState.currentUser.name }}</strong></div>
+      <div class="field"><span>Email</span><strong>{{ authState.currentUser.email }}</strong></div>
+      <div class="field"><span>Workspace role</span><strong>Owner</strong></div>
+    </div>
+
+    <div class="panel">
+      <h3>Preferences</h3>
+      <div class="pref"><span>Email notifications</span><mat-slide-toggle [checked]="true"></mat-slide-toggle></div>
+      <div class="pref"><span>Dark theme</span><mat-slide-toggle [checked]="true"></mat-slide-toggle></div>
+      <div class="pref"><span>Render completion alerts</span><mat-slide-toggle [checked]="true"></mat-slide-toggle></div>
+    </div>
+  </section>
+</div>

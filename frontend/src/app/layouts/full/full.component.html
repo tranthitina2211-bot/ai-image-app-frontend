@@ -1,0 +1,44 @@
+<div class="main-container" [class.auth-layout]="isAuthPage" [class.landing-layout]="isLanding">
+  <mat-toolbar color="primary" class="topbar telative" *ngIf="!isAuthPage">
+    <div class="navbar-header">
+      <a class="navbar-brand app-brand" routerLink="/">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-copy">
+          <strong>PaintingAI</strong>
+          <small>Studio</small>
+        </span>
+      </a>
+    </div>
+
+    <button mat-icon-button *ngIf="!isLanding" class="shell-toggle" (click)="toggleSidebar()" value="sidebarclosed" aria-label="Toggle menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <app-header class="d-flex align-items-center ml-auto"></app-header>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="example-sidenav-container" [class.no-topbar]="isAuthPage" [style.marginTop.px]="0">
+    <mat-sidenav
+      #snav
+      id="snav"
+      class="dark-sidebar pl-xs"
+      [mode]="mobileQuery.matches ? 'side' : 'over'"
+      fixedTopGap="0"
+      [opened]="mobileQuery.matches"
+      [disableClose]="mobileQuery.matches"
+      *ngIf="!isLanding && !isAuthPage">
+
+      <app-sidebar></app-sidebar>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="page-wrapper" [ngClass]="{ 'is-landing': isLanding, 'is-auth': isAuthPage }">
+      <div class="page-layout" [class.has-prompt]="!isLanding && !isAuthPage">
+        <div class="page-content">
+          <router-outlet><app-spinner></app-spinner></router-outlet>
+        </div>
+
+        <app-prompt-bar *ngIf="!isLanding && !isAuthPage"></app-prompt-bar>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

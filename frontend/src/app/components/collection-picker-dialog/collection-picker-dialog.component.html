@@ -1,0 +1,45 @@
+<div class="dialog-shell dialog-collection-picker">
+  <div class="dialog-head">
+    <div class="dialog-title">{{ data.title || 'Add to collection' }}</div>
+    <div class="dialog-subtitle">Choose a collection for this item</div>
+  </div>
+
+  <div class="dialog-body">
+    <div class="collection-list" *ngIf="data.collections.length; else empty">
+      <button
+        type="button"
+        class="collection-row"
+        [class.included]="isIncluded(c)"
+        *ngFor="let c of data.collections; trackBy: trackById"
+        (click)="choose(c.id)">
+        <div class="row-left">
+          <div class="folder-icon">📁</div>
+          <div class="meta">
+            <div class="name" [title]="c.name">{{ c.name }}</div>
+            <div class="count">
+              {{ c.itemIds.length }} items
+              <span class="included-badge" *ngIf="isIncluded(c)">Already added</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-right">
+          <span class="state" *ngIf="isIncluded(c)">✓</span>
+          <div class="row-arrow">→</div>
+        </div>
+      </button>
+    </div>
+
+    <ng-template #empty>
+      <div class="empty-state">
+        <div class="empty-title">No collections yet</div>
+        <div class="empty-sub">Create a new collection to organize this item.</div>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="dialog-actions">
+    <button type="button" class="btn btn-ghost" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="createNew()">+ New collection</button>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+<ng-container *ngIf="state$ | async as state">
+  <div class="app-loading-overlay" *ngIf="state.visible">
+    <div class="overlay-card">
+      <div class="spinner-ring"></div>
+      <div class="message">{{ state.message }}</div>
+      <div class="detail" *ngIf="state.detail">{{ state.detail }}</div>
+    </div>
+  </div>
+</ng-container>

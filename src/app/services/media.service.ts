@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { MediaItem } from '@models/media.model';
 import { AuthStateService } from './auth-state.service';
+import { NotificationService } from './notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class MediaService {
@@ -12,7 +13,8 @@ export class MediaService {
   constructor(
     private ngZone: NgZone,
     private http: HttpClient,
-    private authState: AuthStateService
+    private authState: AuthStateService,
+    private notifications: NotificationService
   ) {
     if (this.authState.isLoggedIn) {
       this.refresh();
@@ -28,11 +30,9 @@ export class MediaService {
   }
 
   refresh(): void {
-    console.log('[MEDIA] refresh start');
-    this.http.get<any>('/api/media?per_page=200').subscribe({
+    this.http.get<any>('/api/media?per_page=60').subscribe({
       next: (res) => {
         const list = Array.isArray(res) ? res : (res?.data ?? []);
-        console.log('[MEDIA] refresh success', { count: list.length });
         this.emit(this.normalizeList(list));
       },
       error: (error) => {
@@ -60,23 +60,19 @@ export class MediaService {
   }
 
   setList(list: MediaItem[]) {
-    console.log('[MEDIA] set list', { count: list.length });
     this.emit(this.normalizeList(list));
   }
 
   add(item: MediaItem) {
-    console.log('[MEDIA] add', item);
     this.emit(this.normalizeList([item, ...this.mediaListSubject.value]));
   }
 
   patch(id: string, partial: Partial<MediaItem>) {
-    console.log('[MEDIA] patch', { id, partial });
     const next = this.mediaListSubject.value.map(it => it.id === id ? ({ ...it, ...partial }) : it);
     this.emit(this.normalizeList(next));
   }
 
   remove(id: string, sync = true) {
-    console.log('[MEDIA] remove', { id, sync });
     const next = this.mediaListSubject.value.filter(it => it.id !== id && it.ghostOf !== id);
     this.emit(this.normalizeList(next));
     if (sync) {
@@ -85,6 +81,9 @@ export class MediaService {
   }
 
   mergeStacks(source: MediaItem[], targetStackId: string) {
+    const sourceStackId = source[0]?.id_stack;
+    if (!sourceStackId || sourceStackId === targetStackId) return;
+
     const current = this.mediaListSubject.value;
     const maxOrder = current
       .filter(x => x.id_stack === targetStackId)
@@ -93,27 +92,41 @@ export class MediaService {
     const sourceIds = new Set(source.map(s => s.id));
     let orderCursor = maxOrder + 1;
 
-    const updated = current.map(item => {
+    const optimistic = current.map(item => {
       if (!sourceIds.has(item.id)) return item;
       return { ...item, id_stack: targetStackId, order_in_stack: orderCursor++ };
     });
 
-    console.log('[MEDIA] merge stacks', { sourceCount: source.length, targetStackId });
-    this.emit(updated);
+    this.emit(optimistic);
+
+    this.http.post('/api/stacks/merge', {
+      sourceStackId,
+      targetStackId
+    }).subscribe({
+      next: () => this.refresh(),
+      error: () => this.refresh()
+    });
   }
 
   toggleFavorite(id: string) {
     const target = this.getById(id);
     if (!target) return;
 
-    const next = this.snapshot().map(x => x.id === id ? { ...x, favorite: !x.favorite } : x);
+    const shouldFavorite = !target.favorite;
+    const next = this.snapshot().map(x => x.id === id ? { ...x, favorite: shouldFavorite } : x);
     this.emit(next);
 
     const req = target.favorite
-      ? this.http.delete(`/api/media/${id}/favorite`)
-      : this.http.post(`/api/media/${id}/favorite`, {});
+      ? this.http.delete<any>(`/api/media/${id}/favorite`)
+      : this.http.post<any>(`/api/media/${id}/favorite`, {});
 
-    req.subscribe({ error: () => this.refresh() });
+    req.subscribe({
+      next: () => {
+        this.patch(id, { favorite: shouldFavorite });
+        this.notifications.refresh();
+      },
+      error: () => this.refresh()
+    });
   }
 
   dropOutFromStack(itemId: string) {
@@ -140,6 +153,11 @@ export class MediaService {
     });
 
     this.emit(next);
+
+    this.http.post('/api/stacks/split', { itemId }).subscribe({
+      next: () => this.refresh(),
+      error: () => this.refresh()
+    });
   }
 
   private normalizeList(list: any[]): MediaItem[] {

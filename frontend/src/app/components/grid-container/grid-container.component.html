@@ -1,0 +1,45 @@
+<div *ngIf="view === 'stack'"
+     class="grid"
+     cdkDropList
+     [cdkDropListData]="stacks"
+     [cdkDropListSortingDisabled]="true">
+
+  <app-board-item
+    *ngFor="let stack of stacks; trackBy: trackByStack"
+    cdkDrag
+    [cdkDragData]="stack"
+    [attr.data-stack-id]="stack.at(0)?.id_stack"
+    (cdkDragMoved)="onLiveReorder($event)"
+    (cdkDragEnded)="onDragEnded()"
+    [items]="stack"
+    (cancel)="onCancel($event)"
+    (mergeDrop)="onMergeDrop($event)"
+    (select)="onSelect($event)">
+  </app-board-item>
+</div>
+
+<div *ngIf="view === 'list'" class="list-host" #listHost [attr.data-grid-size]="gridSize">
+  <cdk-virtual-scroll-viewport
+    class="list-viewport"
+    [itemSize]="rowSizePx"
+    [minBufferPx]="rowSizePx * 6"
+    [maxBufferPx]="rowSizePx * 12"
+    (scrolledIndexChange)="onViewportScrolled()">
+
+    <div
+      class="list-row"
+      *cdkVirtualFor="let row of vRows; trackBy: trackRow"
+      [style.--cols]="cols"
+      [style.--gap.px]="rowGapPx">
+
+      <app-media-card
+        *ngFor="let item of row; trackBy: trackByItem"
+        [item]="item"
+        [selectable]="selectMode"
+        [selected]="!!selectedIds && selectedIds.has(item.id)"
+        (cardClick)="onCardClick(item)">
+      </app-media-card>
+
+    </div>
+  </cdk-virtual-scroll-viewport>
+</div>

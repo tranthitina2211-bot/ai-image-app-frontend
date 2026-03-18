@@ -1,0 +1,39 @@
+<div class="action-wrapper" [class.open-right]="openRight" [class.open]="menuOpen">
+
+  <!-- More button -->
+  <button
+    class="more-btn"
+    type="button"
+    (click)="toggleMenu($event)"
+    [attr.aria-expanded]="menuOpen"
+    aria-haspopup="menu"
+    aria-label="More actions">
+
+    <span class="dots">⋮</span>
+  </button>
+
+  <!-- Dropdown -->
+  <div class="dropdown" *ngIf="menuOpen" role="menu">
+
+    <ng-container *ngFor="let action of actions">
+      <button
+        *ngIf="isVisible(action)"
+        class="dropdown-item"
+        type="button"
+        role="menuitem"
+        (click)="handleClick(action)">
+
+        <!-- ✅ Icon (map theo action.id/label ở TS) -->
+
+        <span class="item-icon material-icons">{{ action.icon }}</span>
+
+        <span class="item-label">
+          {{ action.label }}
+        </span>
+
+
+      </button>
+    </ng-container>
+
+  </div>
+</div>

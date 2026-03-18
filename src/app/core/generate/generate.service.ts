@@ -3,6 +3,8 @@ import { Injectable, NgZone } from '@angular/core';
 import { MediaService } from '@services/media.service';
 import { OverlayService } from '@services/overlay.service';
 import { SettingsService } from '@services/settings.service';
+import { LoadingOverlayService } from '@services/loading-overlay.service';
+import { NotificationService } from '@services/notification.service';
 
 import { MediaItem, MediaType } from '@models/media.model';
 import { GeneratePayload } from 'src/app/core/generate/generate.types';
@@ -25,25 +27,33 @@ export class GenerateService {
     private overlayService: OverlayService,
     private settingsService: SettingsService,
     private ngZone: NgZone,
-    private generateApi: GenerateApiService
+    private generateApi: GenerateApiService,
+    private loadingOverlay: LoadingOverlayService,
+    private notifications: NotificationService
   ) {}
 
   generate(payload: GeneratePayload) {
     console.log('[GENERATE] create job', payload);
 
+    this.loadingOverlay.show('Creating generation...', 'Preparing job and reserving queue slot');
     this.generateApi.createJob(payload).subscribe({
       next: (res: GenerationCreateResponse) => {
         const jobId = typeof res?.jobId === 'string' ? res.jobId : '';
         if (!jobId) {
           console.error('[GENERATE] create job response missing jobId', res);
+          this.loadingOverlay.hide();
           return;
         }
 
         const optimistic = this.createOptimisticFromPayload(jobId, payload, res);
         this.mediaService.add(optimistic);
         this.startPolling(jobId, optimistic.id);
+        this.loadingOverlay.hide();
       },
-      error: (error) => console.error('[GENERATE] create job failed', error)
+      error: (error) => {
+        console.error('[GENERATE] create job failed', error);
+        this.loadingOverlay.hide();
+      }
     });
   }
 
@@ -150,7 +160,7 @@ export class GenerateService {
     jobId: string,
     mediaId: string,
     stackIdForAutoOpen?: string,
-    delayMs = 1200
+    delayMs = 2000
   ): void {
     const timeoutId = window.setTimeout(() => {
       this.pollOnce(jobId, mediaId, stackIdForAutoOpen);
@@ -161,7 +171,7 @@ export class GenerateService {
 
   private pollOnce(jobId: string, mediaId: string, stackIdForAutoOpen?: string): void {
     if (this.pending.has(jobId)) {
-      this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 1200);
+      this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 2000);
       return;
     }
 
@@ -190,7 +200,7 @@ export class GenerateService {
           return;
         }
 
-        this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 1200);
+        this.scheduleNextPoll(jobId, mediaId, stackIdForAutoOpen, 2000);
       },
       error: (error) => {
         this.pending.delete(jobId);
@@ -200,6 +210,7 @@ export class GenerateService {
         this.patchProcessingMedia(mediaId, {
           status: 'error'
         });
+        this.notifications.refresh();
       }
     });
   }
@@ -231,6 +242,7 @@ export class GenerateService {
     }
 
     this.mediaService.refresh();
+    this.notifications.refresh();
     console.log('[GENERATE] polling finished', { jobId, status: 'done' });
   }
 
@@ -244,10 +256,12 @@ export class GenerateService {
 
     if (status === 'cancelled') {
       this.mediaService.remove(mediaId, false);
+      this.notifications.refresh();
     } else {
       this.patchProcessingMedia(mediaId, {
         status: 'error'
       });
+      this.notifications.refresh();
     }
 
     console.error('[GENERATE] polling finished', { jobId, status, error });

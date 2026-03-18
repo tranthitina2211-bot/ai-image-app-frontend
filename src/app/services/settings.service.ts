@@ -56,6 +56,19 @@ export class SettingsService {
     private readonly http: HttpClient,
     private readonly authState: AuthStateService
   ) {
+    if (this.authState.isLoggedIn) {
+      this.fetchRemote();
+    }
+
+    this.authState.loggedIn$.subscribe(isLoggedIn => {
+      if (isLoggedIn) {
+        this.fetchRemote();
+      } else {
+        const next = this.loadSettings();
+        this.settingsSubject.next(next);
+      }
+    });
+
     this.syncQueue$
       .pipe(
         debounceTime(450),
@@ -64,13 +77,8 @@ export class SettingsService {
             return EMPTY;
           }
 
-          console.log('[SETTINGS] sync start', settings);
-
           return this.http.put<UserSettings>('/api/settings', settings).pipe(
-            tap(remote => {
-              console.log('[SETTINGS] sync success', remote);
-              this.hydrate(remote ?? null);
-            }),
+            tap(remote => this.hydrate(remote ?? null)),
             catchError(error => {
               console.error('[SETTINGS] sync failed', error);
               return EMPTY;
@@ -140,56 +148,59 @@ export class SettingsService {
   }
 
   hydrate(payload: UserSettings | null): void {
+    const normalized = this.unwrapPayload(payload);
     const current = this.settingsSubject.value;
+    const base = current ?? this.cloneDefaults();
 
-    const profile = payload?.profile;
-    const profileGender = profile?.gender;
-    const payloadTheme = payload?.theme;
-    const payloadGridSize = payload?.gridSize;
-    const payloadDefaultRatio = payload?.defaultRatio;
+    const rawProfile = normalized?.profile ?? {};
 
-    const nextGender: UserGender = this.isGender(profileGender)
-      ? profileGender
-      : current.profile.gender;
+    const profile = {
+      displayName: this.pickString(rawProfile, 'displayName', 'display_name') ?? base.profile.displayName,
+      avatarUrl: this.pickString(rawProfile, 'avatarUrl', 'avatar_url') ?? base.profile.avatarUrl,
+      phone: this.pickString(rawProfile, 'phone') ?? base.profile.phone,
+      gender: this.isGender(rawProfile?.gender)
+        ? rawProfile.gender as UserGender
+        : base.profile.gender,
+      birthYear: this.normalizeBirthYear(
+        this.pickNumberOrNull(rawProfile, 'birthYear', 'birth_year') ?? base.profile.birthYear
+      )
+    };
 
-    const nextTheme: AppTheme = this.isTheme(payloadTheme)
-      ? payloadTheme
-      : current.theme;
+    const rawTheme = this.pickString(normalized, 'theme');
+    const rawGridSize = this.pickString(normalized, 'gridSize', 'grid_size');
+    const rawDefaultRatio = this.pickString(normalized, 'defaultRatio', 'default_ratio');
 
-    const nextGridSize: GridSize = this.isGridSize(payloadGridSize)
-      ? payloadGridSize
-      : current.gridSize;
+    const nextTheme: AppTheme = this.isTheme(rawTheme)
+      ? rawTheme
+      : (base.theme ?? SETTINGS_DEFAULT.theme);
 
-    const nextDefaultRatio: DefaultRatio = this.isDefaultRatio(payloadDefaultRatio)
-      ? payloadDefaultRatio
-      : current.defaultRatio;
+    const nextGridSize: GridSize = this.isGridSize(rawGridSize)
+      ? rawGridSize
+      : (base.gridSize ?? SETTINGS_DEFAULT.gridSize);
+
+    const nextDefaultRatio: DefaultRatio = this.isDefaultRatio(rawDefaultRatio)
+      ? rawDefaultRatio
+      : (base.defaultRatio ?? SETTINGS_DEFAULT.defaultRatio);
 
     const next: AppSettings = {
-      ...current,
-      profile: {
-        ...current.profile,
-        ...(profile ?? {}),
-        displayName: profile?.displayName ?? current.profile.displayName,
-        avatarUrl: profile?.avatarUrl ?? current.profile.avatarUrl,
-        gender: nextGender,
-        birthYear: this.normalizeBirthYear(
-          profile?.birthYear ?? current.profile.birthYear
-        ),
-        phone: String(profile?.phone ?? current.profile.phone ?? '')
-      },
+      ...this.cloneDefaults(),
+      ...base,
+      profile,
       theme: nextTheme,
       gridSize: nextGridSize,
       defaultRatio: nextDefaultRatio,
-      autoOpenResult: payload?.autoOpenResult ?? current.autoOpenResult,
-      autoSavePrompt: payload?.autoSavePrompt ?? current.autoSavePrompt,
+      autoOpenResult:
+        this.pickBoolean(normalized, 'autoOpenResult', 'auto_open_result')
+        ?? base.autoOpenResult,
+      autoSavePrompt:
+        this.pickBoolean(normalized, 'autoSavePrompt', 'auto_save_prompt')
+        ?? base.autoSavePrompt,
       confirmBeforeDelete:
-        payload?.confirmBeforeDelete ??
-        payload?.confirmDelete ??
-        current.confirmBeforeDelete,
+        this.pickBoolean(normalized, 'confirmBeforeDelete', 'confirmDelete', 'confirm_before_delete', 'confirm_delete')
+        ?? base.confirmBeforeDelete,
       autoplayVideoPreview:
-        payload?.autoplayVideoPreview ??
-        payload?.autoplayVideo ??
-        current.autoplayVideoPreview
+        this.pickBoolean(normalized, 'autoplayVideoPreview', 'autoplayVideo', 'autoplay_video_preview', 'autoplay_video')
+        ?? base.autoplayVideoPreview
     };
 
     this.settingsSubject.next(next);
@@ -200,12 +211,31 @@ export class SettingsService {
     if (!this.authState.isLoggedIn) return;
 
     this.http.get<UserSettings>('/api/settings').subscribe({
-      next: payload => {
-        console.log('[SETTINGS] fetch remote success', payload);
-        this.hydrate(payload ?? null);
-      },
+      next: payload => this.hydrate(payload ?? null),
       error: error => console.error('[SETTINGS] fetch remote failed', error)
     });
+  }
+
+  private unwrapPayload(payload: any): UserSettings | null {
+    if (!payload || typeof payload !== 'object') return null;
+
+    let current: any = payload;
+
+    for (let i = 0; i < 3; i++) {
+      if (current?.data && typeof current.data === 'object') {
+        current = current.data;
+        continue;
+      }
+
+      if (current?.settings && typeof current.settings === 'object') {
+        current = current.settings;
+        continue;
+      }
+
+      break;
+    }
+
+    return current as UserSettings;
   }
 
   private normalizeBirthYear(value: unknown): number | null {
@@ -305,5 +335,37 @@ export class SettingsService {
 
   private isGender(value: unknown): value is UserGender {
     return ['male', 'female', 'other', 'prefer_not_to_say'].includes(String(value));
+  }
+
+  private pickString(source: any, ...keys: string[]): string | undefined {
+    for (const key of keys) {
+      const value = source?.[key];
+      if (typeof value === 'string' && value.trim() !== '') {
+        return value;
+      }
+    }
+    return undefined;
+  }
+
+  private pickBoolean(source: any, ...keys: string[]): boolean | undefined {
+    for (const key of keys) {
+      const value = source?.[key];
+      if (typeof value === 'boolean') {
+        return value;
+      }
+    }
+    return undefined;
+  }
+
+  private pickNumberOrNull(source: any, ...keys: string[]): number | null | undefined {
+    for (const key of keys) {
+      const value = source?.[key];
+      if (value === null) return null;
+      if (value === undefined || value === '') continue;
+
+      const numeric = Number(value);
+      if (Number.isInteger(numeric)) return numeric;
+    }
+    return undefined;
   }
 }

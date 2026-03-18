@@ -42,6 +42,7 @@ import { StackComponent } from '@overlays/overlay/components/stack/stack.compone
 import { ActionBarComponent } from '@overlays/overlay/components/actions/action-bar.component';
 import { ItemDetailSheetComponent } from '@components/item-detail-sheet/item-detail-sheet.component';
 import { PresetCardComponent } from '@components/preset-card/preset-card.component';
+import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay.component';
 
 @NgModule({
   declarations: [
@@ -64,7 +65,8 @@ import { PresetCardComponent } from '@components/preset-card/preset-card.compone
     StackComponent,
     ActionBarComponent,
     ItemDetailSheetComponent,
-    PresetCardComponent
+    PresetCardComponent,
+    LoadingOverlayComponent
   ],
   imports: [
     CommonModule,
@@ -109,7 +111,8 @@ import { PresetCardComponent } from '@components/preset-card/preset-card.compone
     MatSlideToggleModule,
     ReactiveFormsModule,
     FormsModule,
-    PresetCardComponent
+    PresetCardComponent,
+    LoadingOverlayComponent
   ],
   providers: [MenuItems]
 })
